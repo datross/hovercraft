@@ -16,7 +16,10 @@ OBJ_FILES = $(patsubst $(SRC_PATH)/%.c,$(OBJ_PATH)/%.o, $(SRC_FILES))
 
 .PHONY: all clean mrproper re
 
-all: $(BIN_PATH)/$(APP_BIN)
+all: $(BIN_PATH)/$(APP_BIN) data
+
+data: 
+	@mkdir data
 
 $(BIN_PATH)/$(APP_BIN): $(OBJ_FILES)
 	@mkdir -p $(BIN_PATH)
