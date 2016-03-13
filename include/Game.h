@@ -18,7 +18,12 @@ typedef struct {
 void Game_init(Game *g);
 void Game_deinit(Game *g);
 /* Redimensionne la fen^etre conformément aux champs win_w, win_h et ortho2d. */
-void Game_reshape(Game *g);
+void Game_resizeWindow(const Game *g);
+void Game_resizeWorld(const Game *g);
+static inline void Game_reshape(const Game *g) {
+    Game_resizeWindow(g);
+    Game_resizeWorld(g);
+}
 void Game_handleEvent(Game *g, const SDL_Event *e);
 /* Mise à jour de la logique du jeu. Découplée de la gestion d'évènements. */
 void Game_update(Game *g);

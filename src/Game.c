@@ -12,7 +12,7 @@ void Game_init(Game *g) {
 void Game_deinit(Game *g) {
     /* TODO */
 }
-void Game_reshape(Game *g) {
+void Game_resizeWindow(const Game *g) {
     if(!SDL_SetVideoMode(g->win_w, g->win_h, g->bits_per_pixel, 
                 SDL_OPENGL | SDL_DOUBLEBUF | SDL_RESIZABLE)) {
         fprintf(stderr, "Impossible d'ouvrir la fenetre. Fin du programme.\n");
@@ -20,6 +20,9 @@ void Game_reshape(Game *g) {
         exit(EXIT_FAILURE);
     }
     glViewport(0, 0, g->win_w, g->win_h);
+}
+
+void Game_resizeWorld(const Game *g) {
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
 #define o (g->ortho2d)
