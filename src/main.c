@@ -16,15 +16,6 @@ int main(int argc, char* argv[]) {
 
     Game game;
     Game_init(&game);
-
-    game.win_w = 800;
-    game.win_h = 600;
-    game.bits_per_pixel = 32;
-    game.ortho2d.left   = -1.f;
-    game.ortho2d.right  =  1.f;
-    game.ortho2d.bottom = -1.f;
-    game.ortho2d.top    =  1.f;
-
     Game_reshape(&game);
 
     SDL_WM_SetCaption("Hovercraft", NULL);

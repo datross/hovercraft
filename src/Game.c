@@ -7,25 +7,31 @@
 #include <Game.h>
 
 void Game_init(Game *g) {
-    /* TODO */
+    g->window_size.x = 800;
+    g->window_size.y = 600;
+    g->bits_per_pixel = 32;
+    g->view.left   = -1.f;
+    g->view.right  =  1.f;
+    g->view.bottom = -1.f;
+    g->view.top    =  1.f;
 }
 void Game_deinit(Game *g) {
     /* TODO */
 }
 void Game_resizeWindow(const Game *g) {
-    if(!SDL_SetVideoMode(g->win_w, g->win_h, g->bits_per_pixel, 
+    if(!SDL_SetVideoMode(g->window_size.x, g->window_size.y, g->bits_per_pixel, 
                 SDL_OPENGL | SDL_DOUBLEBUF | SDL_RESIZABLE)) {
         fprintf(stderr, "Impossible d'ouvrir la fenetre. Fin du programme.\n");
         /* TODO afficher une erreur plus détaillée ? */
         exit(EXIT_FAILURE);
     }
-    glViewport(0, 0, g->win_w, g->win_h);
+    glViewport(0, 0, g->window_size.x, g->window_size.y);
 }
 
-void Game_resizeWorld(const Game *g) {
+void Game_resizeView(const Game *g) {
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
-#define o (g->ortho2d)
+#define o (g->view)
     gluOrtho2D(o.left, o.right, o.bottom, o.top);
 #undef o
 }
@@ -36,9 +42,9 @@ void Game_handleEvent(Game *g, const SDL_Event *e) {
             g->quit = true;
             break;
         case SDL_VIDEORESIZE:
-            g->win_w = e->resize.w;
-            g->win_h = e->resize.h;
-            Game_reshape(g);
+            g->window_size.x = e->resize.w;
+            g->window_size.y = e->resize.h;
+            Game_resizeWindow(g);
             break;
         default:
             break;
