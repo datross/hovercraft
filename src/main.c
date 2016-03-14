@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <stdbool.h>
 #include <SDL/SDL.h>
+#include <SDL/SDL_image.h>
 #include <GL/gl.h>
 #include <Game.h>
 
@@ -14,9 +15,17 @@ int main(int argc, char* argv[]) {
         return EXIT_FAILURE;
     }
 
+    int flags = IMG_INIT_JPG | IMG_INIT_PNG;
+    if((IMG_Init(flags) & flags) != flags) {
+        printf("IMG_Init: Failed to init required jpg and png support!\n");
+        printf("IMG_Init: %s\n", IMG_GetError());
+        return EXIT_FAILURE;
+    }
+
     Game game;
     Game_init(&game);
     Game_reshape(&game);
+    game.tickrate = FRAMERATE_MILLISECONDS;
 
     SDL_WM_SetCaption("Hovercraft", NULL);
     
@@ -39,6 +48,7 @@ int main(int argc, char* argv[]) {
     }
     
     Game_deinit(&game);
+    IMG_Quit();
     SDL_Quit();
     
     return EXIT_SUCCESS;

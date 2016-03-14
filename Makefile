@@ -1,6 +1,9 @@
 
 CC = gcc
-CFLAGS = -Wall
+# -Wall active -Wswitch, qui râle dès qu'on ne traite pas tous les cas
+# possibles dans des switch().
+# Inacceptable pour des switchs de touches du clavier.
+CFLAGS = -Wall -Wno-switch -O3
 LDFLAGS = -lm -lGL -lGLU -lSDL -lSDL_image
 
 APP_BIN = hovercraft
@@ -16,10 +19,13 @@ OBJ_FILES = $(patsubst $(SRC_PATH)/%.c,$(OBJ_PATH)/%.o, $(SRC_FILES))
 
 .PHONY: all clean mrproper re
 
-all: $(BIN_PATH)/$(APP_BIN) data
+all: $(BIN_PATH)/$(APP_BIN) data/screenshots
 
 data: 
-	@mkdir data
+	@mkdir $@
+data/screenshots: data
+	@mkdir $@
+
 
 $(BIN_PATH)/$(APP_BIN): $(OBJ_FILES)
 	@mkdir -p $(BIN_PATH)
@@ -31,6 +37,6 @@ $(OBJ_PATH)/%.o: $(SRC_PATH)/%.c
 
 
 clean:
-	rm $(OBJ_FILES) $(BIN_PATH)/$(APP_BIN)
+	rm -f $(OBJ_FILES) $(BIN_PATH)/$(APP_BIN)
 re: clean all
 mrproper: re
