@@ -61,14 +61,9 @@ static void Game_updateShipSelection(Game *g) {
     g->update = Game_updateMapSelection;
     memset(g->ships, 0, sizeof(g->ships[0]));
     g->ships[0].accel_multiplier = 0.01f;
-<<<<<<< HEAD
     g->ships[0].tilt_step = M_PI/45.f;
     g->ships[0].friction = 0.99f;
-    g->ships[0].max_speed = 50.f;
-=======
-    g->ships[0].tilt_multiplier = M_PI/45.f;
-    g->ships[0].friction = 0.99f;
->>>>>>> 3b7dbf16e057ac9bee856fd67f8633d21a0a05e7
+    g->ships[0].max_speed = 5.f;
     g->update(g);
 }
 static void Game_updateMainMenu(Game *g) { 
