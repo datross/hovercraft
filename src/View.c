@@ -1,18 +1,13 @@
 #include <math.h>
 #include <GL/gl.h>
 #include <GL/glu.h>
+#include <Utils.h>
 #include <View.h>
 
 void View_apply(const View *v) {
     glScalef(v->zoom, v->zoom, 1);
-    /*
-    const GLdouble theta = v->tilt+M_PI/2.;
-    gluLookAt(
-        v->center.x, v->center.y, -1.,
-        v->center.x, v->center.y,  0.,
-        cos(theta), sin(theta), 0.
-    );
-    */
+    glRotatef(degf(-v->tilt), 0,0,1);
+    glTranslatef(-v->center.x, -v->center.y, 0);
 /*
  * On devrait pouvoir conserver le résultat comme ça :
  *    GLdouble mat[16];

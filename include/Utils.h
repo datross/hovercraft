@@ -6,6 +6,15 @@
 #include <GL/gl.h>
 
 #define max(a,b) ((a)>(b) ? (a) : (b))
+#define degf(a) ((a)*180.f/M_PI)
+#define radf(a) ((a)*M_PI/180.f)
+
+static inline void rad_modulate(float theta) {
+    while(theta < 0)
+        theta += 2.f*M_PI;
+    while(theta >= 2.f*M_PI)
+        theta -= 2.f*M_PI;
+}
 
 static inline void renderSquare(bool full) {
     glBegin(full ? GL_QUADS : GL_LINE_LOOP);
@@ -16,21 +25,28 @@ static inline void renderSquare(bool full) {
     glEnd();
 }
 
-static inline void renderGizmo(void) {
+static inline void renderAxes(void) {
     GLfloat col[4];
     glGetFloatv(GL_CURRENT_COLOR, col);
 
-    glColor3f(1,0,0);
+    glColor3f(0,1,0);
     glBegin(GL_LINES);
     glVertex2f(0, 0);
     glVertex2f(0, 1);
     glEnd();
 
-    glColor3f(0,1,0);
+    glColor3f(1,0,0);
     glBegin(GL_LINES);
     glVertex2f(0, 0);
     glVertex2f(1, 0);
     glEnd();
+
+    glColor3f(0,0,1);
+    glBegin(GL_LINES);
+    glVertex3f(0, 0, 0);
+    glVertex3f(0, 0, 1);
+    glEnd();
+
 
     glColor4f(col[0], col[1], col[2], col[3]);
 }

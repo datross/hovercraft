@@ -14,18 +14,19 @@
 
 static void Game_updateMainMenu(Game *g); /* prototype pour Race(). */
 static void Game_updateRace(Game *g) { 
-    /* TODO */ 
     Ship *s = g->ships;
     if(g->input_state.p1.accelerating) {
         const float theta = s->tilt+M_PI/2.f;
-        s->accel.x += s->accel_multiplier*cosf(theta);
-        s->accel.y += s->accel_multiplier*sinf(theta);
+        s->accel.x = s->accel_multiplier*cosf(theta);
+        s->accel.y = s->accel_multiplier*sinf(theta);
     } else memset(&s->accel, 0, sizeof(Vec2));
 
     if(g->input_state.p1.left_tilting)
         s->tilt += s->tilt_multiplier;
     if(g->input_state.p1.right_tilting)
         s->tilt -= s->tilt_multiplier;
+
+    rad_modulate(s->tilt);
 
     s->vel.x += s->accel.x;
     s->vel.y += s->accel.y;
@@ -34,7 +35,7 @@ static void Game_updateRace(Game *g) {
     s->pos.x += s->vel.x;
     s->pos.y += s->vel.y;
     printf("pos:(%f, %f) tilt: %f deg\n", 
-            s->pos.x, s->pos.y, s->tilt*180.f/M_PI);
+            s->pos.x, s->pos.y, degf(s->tilt));
     g->views[0].center.x = s->pos.x;
     g->views[0].center.y = s->pos.y;
     g->views[0].tilt = s->tilt;
@@ -48,7 +49,7 @@ static void Game_updateMapSelection(Game *g) {
     g->map.size.x = 20.f;
     g->map.size.y = 20.f;
     memset(g->ships, 0, sizeof(g->ships[0]));
-    g->ships[0].accel_multiplier = 0.00001f;
+    g->ships[0].accel_multiplier = 0.01f;
     g->ships[0].tilt_multiplier = M_PI/45.f;
     g->ships[0].friction = 0.996f;
     g->update(g);
