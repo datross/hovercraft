@@ -42,6 +42,7 @@ static void Game_updateRace(Game *g) {
     }
     printf("pos:(%f, %f); tilt: %f deg; speed: %f units/s\n", 
            s->pos.x, s->pos.y, degf(s->tilt), speed);
+
     g->views[0].center.x = s->pos.x;
     g->views[0].center.y = s->pos.y;
     g->views[0].tilt = s->tilt;
@@ -60,9 +61,14 @@ static void Game_updateShipSelection(Game *g) {
     g->update = Game_updateMapSelection;
     memset(g->ships, 0, sizeof(g->ships[0]));
     g->ships[0].accel_multiplier = 0.01f;
+<<<<<<< HEAD
     g->ships[0].tilt_step = M_PI/45.f;
     g->ships[0].friction = 0.99f;
     g->ships[0].max_speed = 50.f;
+=======
+    g->ships[0].tilt_multiplier = M_PI/45.f;
+    g->ships[0].friction = 0.99f;
+>>>>>>> 3b7dbf16e057ac9bee856fd67f8633d21a0a05e7
     g->update(g);
 }
 static void Game_updateMainMenu(Game *g) { 
