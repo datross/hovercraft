@@ -34,8 +34,10 @@ static void Game_updateRace(Game *g) {
     s->vel.y *= s->friction;
     s->pos.x += s->vel.x;
     s->pos.y += s->vel.y;
-    printf("pos:(%f, %f) tilt: %f deg\n", 
-            s->pos.x, s->pos.y, degf(s->tilt));
+    const float dist = sqrtf(s->vel.x*s->vel.x + s->vel.y*s->vel.y);
+    const float speed = 1000.f*dist/g->tickrate;
+    printf("pos:(%f, %f); tilt: %f deg; speed: %f units/s\n", 
+           s->pos.x, s->pos.y, degf(s->tilt), speed);
     g->views[0].center.x = s->pos.x;
     g->views[0].center.y = s->pos.y;
     g->views[0].tilt = s->tilt;
@@ -51,7 +53,7 @@ static void Game_updateMapSelection(Game *g) {
     memset(g->ships, 0, sizeof(g->ships[0]));
     g->ships[0].accel_multiplier = 0.01f;
     g->ships[0].tilt_multiplier = M_PI/45.f;
-    g->ships[0].friction = 0.996f;
+    g->ships[0].friction = 0.99f;
     g->update(g);
 }
 static void Game_updateShipSelection(Game *g) {
@@ -73,10 +75,11 @@ void Game_init(Game *g) {
     g->window_size.x = 800;
     g->window_size.y = 600;
     g->bits_per_pixel = 32;
-    g->view_count = 1;
     g->update = Game_updateMainMenu;
-    memset(g->views, 0, sizeof(g->views[0]));
+    memset(g->views, 0, 2*sizeof(View));
     g->views[0].zoom = 1.f;
+    g->views[1].zoom = 1.f;
+    g->view_count = 2;
 }
 void Game_deinit(Game *g) {
     /* Rien pour l'instant. */
@@ -96,13 +99,12 @@ static void Game_resizeViewports(Game *g) {
         g->views[0].viewport_pos.y  = 0;
         {
             const uint32_t hw = g->window_size.x/2;
-            const uint32_t hh = g->window_size.y/2;
             g->views[0].viewport_size.x = hw;
-            g->views[0].viewport_size.y = hh;
+            g->views[0].viewport_size.y = g->window_size.y;
             g->views[1].viewport_pos.x  = hw;
-            g->views[1].viewport_pos.y  = hh;
+            g->views[1].viewport_pos.y  = 0;
             g->views[1].viewport_size.x = hw;
-            g->views[1].viewport_size.y = hh;
+            g->views[1].viewport_size.y = g->window_size.y;
         }
         break;
     }
@@ -142,15 +144,30 @@ void Game_reshape(Game *g) {
 }
 
 static void Game_takeScreenshot(const Game *g) {
+    uint8_t *lin = malloc(4 * g->window_size.x);
+    if(!lin) {
+        fputs("Could not take screenshot: malloc() failed.\n", stderr);
+        return;
+    }
     uint8_t *img = malloc(4 * g->window_size.x * g->window_size.y);
     if(!img) {
         fputs("Could not take screenshot: malloc() failed.\n", stderr);
+        free(lin);
         return;
     }
     glReadPixels(0, 0, g->window_size.x, g->window_size.y, 
                  GL_RGBA, GL_UNSIGNED_INT_8_8_8_8, img);
+    /* Faire la symétrie verticale.*/
+    size_t linesize = 4*g->window_size.x;
+    size_t t, b; /* top, bottom */
+    for(t=0, b=g->window_size.y-1 ; t<b ; ++t, --b) {
+        memcpy(lin,            img+t*linesize, linesize);
+        memcpy(img+t*linesize, img+b*linesize, linesize);
+        memcpy(img+b*linesize, lin,            linesize);
+    }
+    free(lin);
     SDL_Surface *surface = SDL_CreateRGBSurfaceFrom(
-            img, g->window_size.x, g->window_size.y, 32, g->window_size.x*4,
+            img, g->window_size.x, g->window_size.y, 32, linesize,
             0xff000000, 0xff0000, 0xff00, 0xff);
     if(!surface) {
         fputs("Could not take screenshot: "
@@ -160,7 +177,7 @@ static void Game_takeScreenshot(const Game *g) {
         return;
     }
     char filename[64];
-    snprintf(filename, sizeof(filename), "data/screenshots/%08x-%08x.bmp",
+    snprintf(filename, sizeof(filename), "data/screenshots/%010u-%010u.bmp",
              (uint32_t)time(NULL), SDL_GetTicks());
     int saved = SDL_SaveBMP(surface, filename);
     SDL_FreeSurface(surface);
@@ -170,10 +187,19 @@ static void Game_takeScreenshot(const Game *g) {
     else printf("Saved screenshot to %s\n", filename);
 }
 
+
+static void Game_quit(Game *g) {
+    g->quit = true;
+    if(g->fullscreen) {
+        g->fullscreen = false;
+        Game_reshape(g);
+    }
+}
+
 void Game_handleEvent(Game *g, const SDL_Event *e) {
     switch(e->type) {
     case SDL_QUIT:
-        g->quit = true;
+        Game_quit(g);
         break;
     case SDL_VIDEORESIZE:
         g->window_size.x = e->resize.w;
@@ -197,7 +223,9 @@ void Game_handleEvent(Game *g, const SDL_Event *e) {
         case SDLK_LEFT:  g->input_state.p1.left_tilting  = false; break;
         case SDLK_RIGHT: g->input_state.p1.right_tilting = false; break;
 
-        case SDLK_ESCAPE: g->quit = true; break;
+        case SDLK_ESCAPE: 
+            Game_quit(g);
+            break;
         case SDLK_F11: 
             g->fullscreen = !g->fullscreen;
             Game_reshape(g);
