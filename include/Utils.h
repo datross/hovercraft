@@ -9,19 +9,20 @@
 #define degf(a) ((a)*180.f/M_PI)
 #define radf(a) ((a)*M_PI/180.f)
 
-static inline void rad_modulate(float theta) {
-    while(theta < 0)
-        theta += 2.f*M_PI;
-    while(theta >= 2.f*M_PI)
-        theta -= 2.f*M_PI;
-}
-
 static inline void renderSquare(bool full) {
     glBegin(full ? GL_QUADS : GL_LINE_LOOP);
     glVertex2f(-.5, -.5);
     glVertex2f( .5, -.5);
     glVertex2f( .5,  .5);
     glVertex2f(-.5,  .5);
+    glEnd();
+}
+
+static inline void renderIsocelesTriangle(bool full) {
+    glBegin(full ? GL_TRIANGLES : GL_LINE_LOOP);
+    glVertex2f(  0,  .5);
+    glVertex2f(-.5, -.5);
+    glVertex2f( .5, -.5);
     glEnd();
 }
 

@@ -13,7 +13,14 @@
 #include <Game.h>
 
 static void Game_updateMainMenu(Game *g); /* prototype pour Race(). */
+
 static void Game_updateRace(Game *g) { 
+
+    uint32_t new_ms = SDL_GetTicks();
+    g->race_time_ms += new_ms - g->race_step_ms;
+    g->race_step_ms = new_ms;
+    printf("elapsed time : %d ms\n", g->race_time_ms);
+
     Ship *s = g->ships;
     if(g->input_state.p1.accelerating) {
         const float theta = s->tilt+M_PI/2.f;
@@ -26,22 +33,28 @@ static void Game_updateRace(Game *g) {
     if(g->input_state.p1.right_tilting)
         s->tilt -= s->tilt_step;
 
-    rad_modulate(s->tilt);
+    s->tilt = fmodf(s->tilt, 2*M_PI);
 
+    /* La friction joue beaucoup sur la vitesse maximale
+     * factuellement atteignable des véhicules. */
+    s->vel.x *= s->friction * g->map.friction;
+    s->vel.y *= s->friction * g->map.friction;
     s->vel.x += s->accel.x;
     s->vel.y += s->accel.y;
-    s->vel.x *= s->friction;
-    s->vel.y *= s->friction;
     s->pos.x += s->vel.x;
     s->pos.y += s->vel.y;
     const float dist = sqrtf(s->vel.x*s->vel.x + s->vel.y*s->vel.y);
     const float speed = 1000.f*dist/g->tickrate;
     if(speed > s->max_speed) {
+        printf("Reaching max speed.\n");
+        /* FIXME C'est une approximation qui est précise
+         * avec 'max_speed' élevée, mais pas tant que ça
+         * quand elle est faible. */
         s->vel.x *= s->max_speed/speed;
         s->vel.y *= s->max_speed/speed;
     }
-    printf("pos:(%f, %f); tilt: %f deg; speed: %f units/s\n", 
-           s->pos.x, s->pos.y, degf(s->tilt), speed);
+    printf("pos:(%f, %f); tilt: %f deg; speed: %u units/s\n", 
+           s->pos.x, s->pos.y, degf(s->tilt), (uint32_t)speed);
 
     g->views[0].center.x = s->pos.x;
     g->views[0].center.y = s->pos.y;
@@ -51,10 +64,34 @@ static void Game_updateRace(Game *g) {
     if(g->input_state.p1.zooming_out)
         g->views[0].zoom *= .9f;
 }
-static void Game_updateMapSelection(Game *g) {
+static void Game_updateCountdown(Game *g) {
+
+    if(g->input_state.p1.zooming_in)
+        g->views[0].zoom *= 1.1f;
+    if(g->input_state.p1.zooming_out)
+        g->views[0].zoom *= .9f;
+
+    uint32_t new_ms = SDL_GetTicks();
+    g->race_time_ms += new_ms - g->race_step_ms;
+    g->race_step_ms = new_ms;
+    if(1-g->race_time_ms > 0) {
+        printf("%d...\n", 1-g->race_time_ms/1000);
+        return;
+    }
+    puts("Go!!!");
     g->update = Game_updateRace;
+    g->update(g);
+}
+static void Game_updateMapSelection(Game *g) {
+    g->update = Game_updateCountdown;
     g->map.size.x = 20.f;
-    g->map.size.y = 20.f;
+    g->map.size.y = 10.f;
+    g->map.friction = 0.99999f;
+    g->views[0].center.x = g->ships[0].pos.x;
+    g->views[0].center.y = g->ships[0].pos.y;
+    g->views[0].tilt = g->ships[0].tilt;
+    g->race_time_ms = -5000;
+    g->race_step_ms = SDL_GetTicks();
     g->update(g);
 }
 static void Game_updateShipSelection(Game *g) {
@@ -62,13 +99,17 @@ static void Game_updateShipSelection(Game *g) {
     memset(g->ships, 0, sizeof(g->ships[0]));
     g->ships[0].accel_multiplier = 0.01f;
     g->ships[0].tilt_step = M_PI/45.f;
-    g->ships[0].friction = 0.99f;
-    g->ships[0].max_speed = 5.f;
+    g->ships[0].friction = 0.997f;
+    g->ships[0].max_speed = 200.f;
     g->update(g);
 }
 static void Game_updateMainMenu(Game *g) { 
     g->update = Game_updateShipSelection;
     g->ship_count = 1;
+    g->update(g);
+}
+static void Game_updateStartScreen(Game *g) {
+    g->update = Game_updateMainMenu;
     g->update(g);
 }
 void Game_update(Game *g) {
@@ -81,7 +122,7 @@ void Game_init(Game *g) {
     g->window_size.x = 800;
     g->window_size.y = 600;
     g->bits_per_pixel = 32;
-    g->update = Game_updateMainMenu;
+    g->update = Game_updateStartScreen;
     memset(g->views, 0, 2*sizeof(View));
     g->views[0].zoom = 1.f;
     g->views[1].zoom = 1.f;
@@ -195,11 +236,11 @@ static void Game_takeScreenshot(const Game *g) {
 
 
 static void Game_quit(Game *g) {
-    g->quit = true;
     if(g->fullscreen) {
         g->fullscreen = false;
         Game_reshape(g);
     }
+    g->quit = true;
 }
 
 void Game_handleEvent(Game *g, const SDL_Event *e) {

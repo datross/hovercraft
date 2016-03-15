@@ -7,6 +7,10 @@ user hovercraft
 passive
 prompt
 binary
-mput *
+put ships/dolphin_unicorn.txt
+put ships/dolphin_unicorn.png
+put ships/dolphin_unicorn.pal.png
+put maps/bigblue.txt
+put maps/bigblue.png
 bye
 EOF

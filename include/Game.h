@@ -52,6 +52,8 @@ struct Game {
     unsigned quit       : 1;
     unsigned fullscreen : 1;
     unsigned reserved   : 2; /* Padding pour que le bitfield fasse un octet. */
+    uint32_t race_step_ms;
+     int32_t race_time_ms;
 };
 
 /* Game_init() seul ne suffit pas à afficher le jeu. 

@@ -5,6 +5,7 @@
 
 typedef struct {
     Vec2 size; /* Bords, en coordonnées monde. */
+    float friction;
     /* TODO checkpoints, obstacles, etc. */
 } Map;
 
