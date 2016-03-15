@@ -35,6 +35,7 @@ void View_mapPixeltoCoords(const View *v, Vec2 *coords, const Vec2u *pixel) {
     coords->x = cx;
     coords->y = cy;
 }
+
 void View_mapCoordstoPixel(const View *v, Vec2u *pixel, const Vec2 *coords) {
     GLdouble modelview[16], proj[16];
     glMatrixMode(GL_MODELVIEW);

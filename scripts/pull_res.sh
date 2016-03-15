@@ -1,7 +1,7 @@
 #!/bin/bash
 
 if [[ -d ../scripts ]]; then cd ..; fi
-mkdir -p res 
+mkdir -p res/maps res/ships
 cd res 
 ftp -nv yoanlecoq.com << EOF
 user hovercraft

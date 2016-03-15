@@ -51,8 +51,7 @@ struct Game {
     unsigned ship_count : 2;
     unsigned quit       : 1;
     unsigned fullscreen : 1;
-    unsigned reserved   : 2; /* Padding pour que le bitfield fasse un octet
-                            (Même si c'est automatique en fin de struct). */
+    unsigned reserved   : 2; /* Padding pour que le bitfield fasse un octet. */
 };
 
 /* Game_init() seul ne suffit pas à afficher le jeu. 
