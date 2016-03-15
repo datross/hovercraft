@@ -22,6 +22,16 @@ static void Game_updateRace(Game *g) {
     printf("elapsed time : %d ms\n", g->race_time_ms);
 
     Ship *s = g->ships;
+
+    {
+        Vec2 diff = {s->objective.x - s->pos.x, s->objective.y - s->pos.y};
+        s->objective_theta = degf(atan2f(diff.y, diff.x))-90.f;
+        s->objective_distance = sqrtf(diff.x*diff.x + diff.y*diff.y);
+        printf("Distance from objective : %u units.\n", 
+                (uint32_t)s->objective_distance);
+    }
+
+
     if(g->input_state.p1.accelerating) {
         const float theta = s->tilt+M_PI/2.f;
         s->accel.x = s->accel_multiplier*cosf(theta);
@@ -92,6 +102,8 @@ static void Game_updateMapSelection(Game *g) {
     g->views[0].tilt = g->ships[0].tilt;
     g->race_time_ms = -5000;
     g->race_step_ms = SDL_GetTicks();
+    g->ships[0].objective.x = 4.f;
+    g->ships[0].objective.y = 2.f;
     g->update(g);
 }
 static void Game_updateShipSelection(Game *g) {

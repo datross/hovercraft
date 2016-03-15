@@ -7,13 +7,8 @@ static void Ship_renderGuide(const Ship *s) {
     glColor3f(1.f,.0f,0.f);
     glPushMatrix(); 
     {
-        Vec2 focus = {4, 2};
-        Vec2 diff = {focus.x-s->pos.x, focus.y-s->pos.y};
-        float theta = degf(atan2f(diff.y, diff.x))-90.f;
-        float dist = sqrtf(diff.x*diff.x + diff.y*diff.y);
-        printf("Target's distance : %u units.\n", (uint32_t)dist);
         glTranslatef(s->pos.x, s->pos.y, 0);
-        glRotatef(theta,0,0,1);
+        glRotatef(s->objective_theta,0,0,1);
         glTranslatef(0, 1.5f, 0);
         glScalef(.6f, .6f, 1.f);
         renderIsocelesTriangle(true);

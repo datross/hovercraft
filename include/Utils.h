@@ -48,7 +48,6 @@ static inline void renderAxes(void) {
     glVertex3f(0, 0, 1);
     glEnd();
 
-
     glColor4f(col[0], col[1], col[2], col[3]);
 }
 

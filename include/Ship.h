@@ -7,6 +7,9 @@ typedef struct {
     Vec2 pos, vel, accel;
     Vec2 size; /* Utilisée pour le quad texturé et les collisions.
                   Normalement la taille de référence est : une unité. */
+    Vec2  objective; /* Ciblage d'objectif. */
+    float objective_distance; /* privee. */
+    float objective_theta;    /* privee. */
     float tilt;
     float accel_multiplier;
     float tilt_step;
