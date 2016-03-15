@@ -9,8 +9,9 @@ typedef struct {
                   Normalement la taille de référence est : une unité. */
     float tilt;
     float accel_multiplier;
-    float tilt_multiplier;
+    float tilt_step;
     float friction;
+    float max_speed;
     GLuint texture_id;
 } Ship;
 

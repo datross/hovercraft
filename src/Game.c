@@ -22,9 +22,9 @@ static void Game_updateRace(Game *g) {
     } else memset(&s->accel, 0, sizeof(Vec2));
 
     if(g->input_state.p1.left_tilting)
-        s->tilt += s->tilt_multiplier;
+        s->tilt += s->tilt_step;
     if(g->input_state.p1.right_tilting)
-        s->tilt -= s->tilt_multiplier;
+        s->tilt -= s->tilt_step;
 
     rad_modulate(s->tilt);
 
@@ -36,6 +36,10 @@ static void Game_updateRace(Game *g) {
     s->pos.y += s->vel.y;
     const float dist = sqrtf(s->vel.x*s->vel.x + s->vel.y*s->vel.y);
     const float speed = 1000.f*dist/g->tickrate;
+    if(speed > s->max_speed) {
+        s->vel.x *= s->max_speed/speed;
+        s->vel.y *= s->max_speed/speed;
+    }
     printf("pos:(%f, %f); tilt: %f deg; speed: %f units/s\n", 
            s->pos.x, s->pos.y, degf(s->tilt), speed);
     g->views[0].center.x = s->pos.x;
@@ -50,14 +54,15 @@ static void Game_updateMapSelection(Game *g) {
     g->update = Game_updateRace;
     g->map.size.x = 20.f;
     g->map.size.y = 20.f;
-    memset(g->ships, 0, sizeof(g->ships[0]));
-    g->ships[0].accel_multiplier = 0.01f;
-    g->ships[0].tilt_multiplier = M_PI/45.f;
-    g->ships[0].friction = 0.99f;
     g->update(g);
 }
 static void Game_updateShipSelection(Game *g) {
     g->update = Game_updateMapSelection;
+    memset(g->ships, 0, sizeof(g->ships[0]));
+    g->ships[0].accel_multiplier = 0.01f;
+    g->ships[0].tilt_step = M_PI/45.f;
+    g->ships[0].friction = 0.99f;
+    g->ships[0].max_speed = 50.f;
     g->update(g);
 }
 static void Game_updateMainMenu(Game *g) { 
