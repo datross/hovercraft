@@ -8,6 +8,7 @@ typedef struct {
     Vec2u viewport_pos, viewport_size; /* Window coordinates */
     Vec2 center; /* World coordinates */
     float zoom, tilt; /* tilt = inclinaison, en radians. */
+    float ortho_right; /* pour gluOrtho2D(). */
 } View;
 
 void View_apply(const View *v);

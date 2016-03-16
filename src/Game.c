@@ -12,6 +12,14 @@
 #include <Utils.h>
 #include <Game.h>
 
+void Ship_refreshGuide(Ship *s) {
+    Vec2 diff = {s->objective.x - s->pos.x, s->objective.y - s->pos.y};
+    s->objective_theta = degf(atan2f(diff.y, diff.x))-90.f;
+    s->objective_distance = sqrtf(diff.x*diff.x + diff.y*diff.y);
+    printf("Distance from objective : %u units.\n", 
+            (uint32_t)s->objective_distance);
+}
+
 static void Game_updateMainMenu(Game *g); /* prototype pour Race(). */
 
 static void Game_updateRace(Game *g) { 
@@ -21,65 +29,66 @@ static void Game_updateRace(Game *g) {
     g->race_step_ms = new_ms;
     printf("elapsed time : %d ms\n", g->race_time_ms);
 
-    Ship *s = g->ships;
+    size_t i;
+    for(i=0 ; i<g->ship_count ; ++i) {
+        Ship *s = g->ships+i;
 
-    {
-        Vec2 diff = {s->objective.x - s->pos.x, s->objective.y - s->pos.y};
-        s->objective_theta = degf(atan2f(diff.y, diff.x))-90.f;
-        s->objective_distance = sqrtf(diff.x*diff.x + diff.y*diff.y);
-        printf("Distance from objective : %u units.\n", 
-                (uint32_t)s->objective_distance);
+        if(g->input.players[i].accelerating) {
+            const float theta = s->tilt+M_PI/2.f;
+            s->accel.x = s->accel_multiplier*cosf(theta);
+            s->accel.y = s->accel_multiplier*sinf(theta);
+        } else memset(&s->accel, 0, sizeof(Vec2));
+
+        if(g->input.players[i].left_tilting)
+            s->tilt += s->tilt_step;
+        if(g->input.players[i].right_tilting)
+            s->tilt -= s->tilt_step;
+
+        s->tilt = fmodf(s->tilt, 2*M_PI);
+
+        /* La friction joue beaucoup sur la vitesse maximale
+         * factuellement atteignable des véhicules. */
+        s->vel.x *= s->friction * g->map.friction;
+        s->vel.y *= s->friction * g->map.friction;
+        s->vel.x += s->accel.x;
+        s->vel.y += s->accel.y;
+        s->pos.x += s->vel.x;
+        s->pos.y += s->vel.y;
+        const float dist = sqrtf(s->vel.x*s->vel.x + s->vel.y*s->vel.y);
+        const float speed = 1000.f*dist/g->tickrate;
+        if(speed > s->max_speed) {
+            printf("Reaching max speed.\n");
+            /* FIXME C'est une approximation qui est précise
+             * avec 'max_speed' élevée, mais pas tant que ça
+             * quand elle est faible. */
+            s->vel.x *= s->max_speed/speed;
+            s->vel.y *= s->max_speed/speed;
+        }
+        Ship_refreshGuide(s);
+        printf("pos:(%f, %f); tilt: %f deg; speed: %u units/s\n", 
+               s->pos.x, s->pos.y, degf(s->tilt), (uint32_t)speed);
+
+        if(i>=g->view_count)
+            break;
+        g->views[i].center.x = s->pos.x;
+        g->views[i].center.y = s->pos.y;
+        g->views[i].tilt = s->tilt;
+        if(g->input.players[i].zooming_in && g->views[i].zoom < 6.f)
+            g->views[i].zoom *= 1.1f;
+        if(g->input.players[i].zooming_out && g->views[i].zoom > 0.02f)
+            g->views[i].zoom *= .9f;
+        if(i==0)printf("zoom : %f\n", g->views[i].zoom);
     }
-
-
-    if(g->input_state.p1.accelerating) {
-        const float theta = s->tilt+M_PI/2.f;
-        s->accel.x = s->accel_multiplier*cosf(theta);
-        s->accel.y = s->accel_multiplier*sinf(theta);
-    } else memset(&s->accel, 0, sizeof(Vec2));
-
-    if(g->input_state.p1.left_tilting)
-        s->tilt += s->tilt_step;
-    if(g->input_state.p1.right_tilting)
-        s->tilt -= s->tilt_step;
-
-    s->tilt = fmodf(s->tilt, 2*M_PI);
-
-    /* La friction joue beaucoup sur la vitesse maximale
-     * factuellement atteignable des véhicules. */
-    s->vel.x *= s->friction * g->map.friction;
-    s->vel.y *= s->friction * g->map.friction;
-    s->vel.x += s->accel.x;
-    s->vel.y += s->accel.y;
-    s->pos.x += s->vel.x;
-    s->pos.y += s->vel.y;
-    const float dist = sqrtf(s->vel.x*s->vel.x + s->vel.y*s->vel.y);
-    const float speed = 1000.f*dist/g->tickrate;
-    if(speed > s->max_speed) {
-        printf("Reaching max speed.\n");
-        /* FIXME C'est une approximation qui est précise
-         * avec 'max_speed' élevée, mais pas tant que ça
-         * quand elle est faible. */
-        s->vel.x *= s->max_speed/speed;
-        s->vel.y *= s->max_speed/speed;
-    }
-    printf("pos:(%f, %f); tilt: %f deg; speed: %u units/s\n", 
-           s->pos.x, s->pos.y, degf(s->tilt), (uint32_t)speed);
-
-    g->views[0].center.x = s->pos.x;
-    g->views[0].center.y = s->pos.y;
-    g->views[0].tilt = s->tilt;
-    if(g->input_state.p1.zooming_in)
-        g->views[0].zoom *= 1.1f;
-    if(g->input_state.p1.zooming_out)
-        g->views[0].zoom *= .9f;
 }
 static void Game_updateCountdown(Game *g) {
 
-    if(g->input_state.p1.zooming_in)
-        g->views[0].zoom *= 1.1f;
-    if(g->input_state.p1.zooming_out)
-        g->views[0].zoom *= .9f;
+    size_t i;
+    for(i=0 ; i<g->view_count ; ++i) {
+        if(g->input.players[i].zooming_in && g->views[i].zoom < 6.f)
+            g->views[i].zoom *= 1.1f;
+        if(g->input.players[i].zooming_out && g->views[i].zoom > 0.02f)
+            g->views[i].zoom *= .9f;
+    }
 
     uint32_t new_ms = SDL_GetTicks();
     g->race_time_ms += new_ms - g->race_step_ms;
@@ -92,32 +101,62 @@ static void Game_updateCountdown(Game *g) {
     g->update = Game_updateRace;
     g->update(g);
 }
-static void Game_updateMapSelection(Game *g) {
-    g->update = Game_updateCountdown;
-    g->map.size.x = 20.f;
-    g->map.size.y = 10.f;
-    g->map.friction = 0.99999f;
-    g->views[0].center.x = g->ships[0].pos.x;
-    g->views[0].center.y = g->ships[0].pos.y;
-    g->views[0].tilt = g->ships[0].tilt;
+static void Game_updatePreCountdown(Game *g) {
+    size_t i;
+    for(i=0 ; i<g->view_count ; ++i) {
+        g->views[i].center.x = g->ships[i].pos.x;
+        g->views[i].center.y = g->ships[i].pos.y;
+        g->views[i].tilt = g->ships[i].tilt;
+        g->views[i].ortho_right = 8.f;
+    }
+    for(i=0 ; i<g->ship_count ; ++i) {
+        g->ships[i].objective.x = g->map.checkpoints[0].pos.x;
+        g->ships[i].objective.y = g->map.checkpoints[0].pos.y;
+        Ship_refreshGuide(g->ships+i);
+    }
     g->race_time_ms = -5000;
     g->race_step_ms = SDL_GetTicks();
-    g->ships[0].objective.x = 4.f;
-    g->ships[0].objective.y = 2.f;
+
+    g->update = Game_updateCountdown;
+    g->update(g);
+}
+static void Game_updateMapSelection(Game *g) {
+    memset(&g->map, 0, sizeof(Map));
+    g->map.size.x = 2000.f;
+    g->map.size.y = 1000.f;
+    g->map.friction = 0.99999f;
+    g->map.checkpoint_count = 3;
+    g->map.checkpoints[0].pos.x = 50.f;
+    g->map.checkpoints[0].pos.y = 50.f;
+    g->map.checkpoints[0].radius = 20.f;
+    g->map.checkpoints[1].pos.x = -20.f;
+    g->map.checkpoints[1].pos.y = 100.f;
+    g->map.checkpoints[1].radius = 30.f;
+    g->map.checkpoints[2].pos.x = 0.f;
+    g->map.checkpoints[2].pos.y = -50.f;
+    g->map.checkpoints[2].radius = 40.f;
+    g->map.checkpoint_count = 3;
+    g->ships[0].pos.x = -1.f;
+    g->ships[1].pos.x =  1.f;
+
+    g->update = Game_updatePreCountdown;
     g->update(g);
 }
 static void Game_updateShipSelection(Game *g) {
     g->update = Game_updateMapSelection;
-    memset(g->ships, 0, sizeof(g->ships[0]));
+    memset(g->ships, 0, g->ship_count*sizeof(Ship));
     g->ships[0].accel_multiplier = 0.01f;
     g->ships[0].tilt_step = M_PI/45.f;
     g->ships[0].friction = 0.997f;
     g->ships[0].max_speed = 200.f;
+    memcpy(g->ships+1, g->ships, sizeof(Ship));
+    g->ships[0].r = 1.f;
+    g->ships[1].b = 1.f;
     g->update(g);
 }
 static void Game_updateMainMenu(Game *g) { 
     g->update = Game_updateShipSelection;
-    g->ship_count = 1;
+    g->ship_count = 2;
     g->update(g);
 }
 static void Game_updateStartScreen(Game *g) {
@@ -267,20 +306,30 @@ void Game_handleEvent(Game *g, const SDL_Event *e) {
         break;
     case SDL_KEYDOWN:
         switch(e->key.keysym.sym) {
-        case SDLK_SPACE: g->input_state.p1.accelerating  = true; break;
-        case SDLK_UP:    g->input_state.p1.zooming_in    = true; break;
-        case SDLK_DOWN:  g->input_state.p1.zooming_out   = true; break;
-        case SDLK_LEFT:  g->input_state.p1.left_tilting  = true; break;
-        case SDLK_RIGHT: g->input_state.p1.right_tilting = true; break;
+        case SDLK_SPACE:  g->input.players[0].accelerating  = true; break;
+        case SDLK_UP:     g->input.players[0].zooming_in    = true; break;
+        case SDLK_DOWN:   g->input.players[0].zooming_out   = true; break;
+        case SDLK_LEFT:   g->input.players[0].left_tilting  = true; break;
+        case SDLK_RIGHT:  g->input.players[0].right_tilting = true; break;
+        case SDLK_LSHIFT: g->input.players[1].accelerating  = true; break;
+        case SDLK_z:      g->input.players[1].zooming_in    = true; break;
+        case SDLK_s:      g->input.players[1].zooming_out   = true; break;
+        case SDLK_q:      g->input.players[1].left_tilting  = true; break;
+        case SDLK_d:      g->input.players[1].right_tilting = true; break;
         }
         break;
     case SDL_KEYUP:
         switch(e->key.keysym.sym) {
-        case SDLK_SPACE: g->input_state.p1.accelerating  = false; break;
-        case SDLK_UP:    g->input_state.p1.zooming_in    = false; break;
-        case SDLK_DOWN:  g->input_state.p1.zooming_out   = false; break;
-        case SDLK_LEFT:  g->input_state.p1.left_tilting  = false; break;
-        case SDLK_RIGHT: g->input_state.p1.right_tilting = false; break;
+        case SDLK_SPACE:  g->input.players[0].accelerating  = false; break;
+        case SDLK_UP:     g->input.players[0].zooming_in    = false; break;
+        case SDLK_DOWN:   g->input.players[0].zooming_out   = false; break;
+        case SDLK_LEFT:   g->input.players[0].left_tilting  = false; break;
+        case SDLK_RIGHT:  g->input.players[0].right_tilting = false; break;
+        case SDLK_LSHIFT: g->input.players[1].accelerating  = false; break;
+        case SDLK_z:      g->input.players[1].zooming_in    = false; break;
+        case SDLK_s:      g->input.players[1].zooming_out   = false; break;
+        case SDLK_q:      g->input.players[1].left_tilting  = false; break;
+        case SDLK_d:      g->input.players[1].right_tilting = false; break;
 
         case SDLK_ESCAPE: 
             Game_quit(g);
@@ -293,53 +342,54 @@ void Game_handleEvent(Game *g, const SDL_Event *e) {
         }
         break;
     case SDL_MOUSEBUTTONDOWN:
-        g->input_state.mouse_down = true;
-        g->input_state.old_mouse_pos.x = e->button.x;
-        g->input_state.old_mouse_pos.y = e->button.y;
+        g->input.mouse_down = true;
+        g->input.old_mouse_pos.x = e->button.x;
+        g->input.old_mouse_pos.y = e->button.y;
         break;
     case SDL_MOUSEBUTTONUP:
-        g->input_state.mouse_down = false;
-        g->input_state.old_mouse_pos.x = e->button.x;
-        g->input_state.old_mouse_pos.y = e->button.y;
+        g->input.mouse_down = false;
+        g->input.old_mouse_pos.x = e->button.x;
+        g->input.old_mouse_pos.y = e->button.y;
         break;
     case SDL_MOUSEMOTION:
-        g->input_state.old_mouse_pos.x = e->motion.x;
-        g->input_state.old_mouse_pos.y = e->motion.y;
+        g->input.old_mouse_pos.x = e->motion.x;
+        g->input.old_mouse_pos.y = e->motion.y;
         break;
     }
 }
 
-static void Game_renderView(const Game *g, const View *v) {
-    /*
-     * La matrice de projection N'EST PAS pour la caméra. C'est le rôle
-     * de MODELVIEW à la place.
-     */
+static void Game_renderView(const Game *g, size_t view_index) {
+    const View *v = g->views + view_index;
 
     glViewport(v->viewport_pos.x, v->viewport_pos.y,
                v->viewport_size.x, v->viewport_size.y);
 
-    glMatrixMode(GL_PROJECTION);
-    glLoadIdentity();
-    /* FIXME Sûrement bogus si la map est plus haute que large. */
-    const float w = max(g->map.size.x, g->map.size.y);
-    gluOrtho2D(-w, w, 
-        -w*v->viewport_size.y/(float)v->viewport_size.x, 
-         w*v->viewport_size.y/(float)v->viewport_size.x);
-
-    glMatrixMode(GL_MODELVIEW);
-    glLoadIdentity();
     View_apply(v);
 
     Map_render(&g->map);
     size_t i;
-    for(i=0 ; i<g->ship_count ; ++i)
+    for(i=0 ; i<g->ship_count ; ++i) {
         Ship_render(g->ships+i);
+        if(i==view_index) {
+            Map_renderCheckpoints(&g->map, g->ships[i].next_checkpoint_index);
+            Ship_renderGuide(g->ships+i);
+        }
+    }
+
+    Vec2 coords;
+    View_mapPixeltoCoords(v, &coords, &g->input.old_mouse_pos);
+    View_apply(v);
+    glColor3f(1,1,1);
+    glPointSize(3.f);
+    glBegin(GL_POINTS);
+    glVertex2f(coords.x, coords.y);
+    glEnd();
 }
 
 void Game_render(const Game *g) {
     size_t i;
     for(i=0 ; i<g->view_count ; ++i)
-        Game_renderView(g, g->views+i);
+        Game_renderView(g, i);
 }
 
 

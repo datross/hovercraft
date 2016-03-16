@@ -16,8 +16,12 @@ typedef struct {
     float friction;
     float max_speed;
     GLuint texture_id;
+    float r,g,b; /* Temporaire. sera remplacé bientot. */
+    size_t next_checkpoint_index;
 } Ship;
 
 void Ship_render(const Ship *s);
+void Ship_renderGuide(const Ship *s);
+void Ship_renderBoundingVolumes(const Ship *s);
 
 #endif /* SHIP_H */

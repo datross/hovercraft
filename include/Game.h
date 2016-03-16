@@ -19,7 +19,7 @@ typedef struct {
 } PlayerInputState;
 
 typedef struct {
-    PlayerInputState p1, p2;
+    PlayerInputState players[2];
     Vec2u old_mouse_pos;
     unsigned mouse_down : 1;
     unsigned reserved   : 7;
@@ -40,7 +40,7 @@ struct Game {
                                 d'entrer en fullscreen. */
     Vec2u window_size;       /* public. Appeler Game_reshape() en cas de 
                                 changement. */
-    InputState input_state;  /* privé. Altéré par Game_handleEvent(). */
+    InputState input;  /* privé. Altéré par Game_handleEvent(). */
     void (*update)(Game*);   /* privé. Appeler Game_update() à la place. */
     Map map;
     Ship ships[2];
