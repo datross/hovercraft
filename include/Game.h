@@ -54,6 +54,7 @@ struct Game {
     unsigned reserved   : 2; /* Padding pour que le bitfield fasse un octet. */
     uint32_t race_step_ms;
      int32_t race_time_ms;
+    Vec2 world_mouse_cursor;
 };
 
 /* Game_init() seul ne suffit pas à afficher le jeu. 

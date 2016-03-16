@@ -12,12 +12,26 @@
 #include <Utils.h>
 #include <Game.h>
 
-void Ship_refreshGuide(Ship *s) {
-    Vec2 diff = {s->objective.x - s->pos.x, s->objective.y - s->pos.y};
-    s->objective_theta = degf(atan2f(diff.y, diff.x))-90.f;
-    s->objective_distance = sqrtf(diff.x*diff.x + diff.y*diff.y);
-    printf("Distance from objective : %u units.\n", 
-            (uint32_t)s->objective_distance);
+void Ship_refreshGuides(Ship *s) {
+    size_t i;
+    for(i=0 ; i<s->guide_count ; ++i) {
+        Vec2 diff = {s->guides[i].pos.x - s->pos.x, 
+                     s->guides[i].pos.y - s->pos.y};
+        s->guides[i].theta = degf(atan2f(diff.y, diff.x))-90.f;
+        s->guides[i].distance = sqrtf(diff.x*diff.x + diff.y*diff.y);
+        /*
+        printf("Distance from guides[%zu] : %u units.\n", 
+                i, (uint32_t)s->guides[i].distance);
+        */
+    }
+}
+
+static void Game_quit(Game *g) {
+    if(g->fullscreen) {
+        g->fullscreen = false;
+        Game_reshape(g);
+    }
+    g->quit = true;
 }
 
 static void Game_updateMainMenu(Game *g); /* prototype pour Race(). */
@@ -27,7 +41,6 @@ static void Game_updateRace(Game *g) {
     uint32_t new_ms = SDL_GetTicks();
     g->race_time_ms += new_ms - g->race_step_ms;
     g->race_step_ms = new_ms;
-    printf("elapsed time : %d ms\n", g->race_time_ms);
 
     size_t i;
     for(i=0 ; i<g->ship_count ; ++i) {
@@ -64,9 +77,33 @@ static void Game_updateRace(Game *g) {
             s->vel.x *= s->max_speed/speed;
             s->vel.y *= s->max_speed/speed;
         }
-        Ship_refreshGuide(s);
+
+        {
+            const Checkpoint *c = g->map.checkpoints 
+                                  + s->next_checkpoint_index;
+            Vec2 diff = { c->pos.x - s->pos.x, c->pos.y - s->pos.y };
+            float dist = sqrtf(diff.x*diff.x + diff.y*diff.y);
+            if(dist <= c->radius)
+                ++(s->next_checkpoint_index);
+            if(s->next_checkpoint_index >= g->map.checkpoint_count) {
+                printf("It's over ! Player %zu won.\n", i+1);
+                printf("elapsed time : %d ms\n", g->race_time_ms);
+                Game_quit(g);
+            } else {
+                s->guides[0].pos.x = c->pos.x;
+                s->guides[0].pos.y = c->pos.y;
+            }
+       }
+
+        const size_t j = (i+1)%(g->ship_count);
+        s->guides[1].pos.x = g->ships[j].pos.x;
+        s->guides[1].pos.y = g->ships[j].pos.y;
+        Ship_refreshGuides(s);
+
+        /*
         printf("pos:(%f, %f); tilt: %f deg; speed: %u units/s\n", 
                s->pos.x, s->pos.y, degf(s->tilt), (uint32_t)speed);
+        */
 
         if(i>=g->view_count)
             break;
@@ -77,7 +114,7 @@ static void Game_updateRace(Game *g) {
             g->views[i].zoom *= 1.1f;
         if(g->input.players[i].zooming_out && g->views[i].zoom > 0.02f)
             g->views[i].zoom *= .9f;
-        if(i==0)printf("zoom : %f\n", g->views[i].zoom);
+        /* if(i==0)printf("zoom : %f\n", g->views[i].zoom); */
     }
 }
 static void Game_updateCountdown(Game *g) {
@@ -110,11 +147,25 @@ static void Game_updatePreCountdown(Game *g) {
         g->views[i].ortho_right = 8.f;
     }
     for(i=0 ; i<g->ship_count ; ++i) {
-        g->ships[i].objective.x = g->map.checkpoints[0].pos.x;
-        g->ships[i].objective.y = g->map.checkpoints[0].pos.y;
-        Ship_refreshGuide(g->ships+i);
+        g->ships[i].guides[0].pos.x = g->map.checkpoints[0].pos.x;
+        g->ships[i].guides[0].pos.y = g->map.checkpoints[0].pos.y;
+        g->ships[i].guides[0].scale.x = .6f;
+        g->ships[i].guides[0].scale.y = .6f;
+        g->ships[i].guides[0].r = 0;
+        g->ships[i].guides[0].g = 0;
+        g->ships[i].guides[0].b = 0;
+        const size_t j = (i+1)%(g->ship_count);
+        g->ships[i].guides[1].pos.x = g->ships[j].pos.x;
+        g->ships[i].guides[1].pos.y = g->ships[j].pos.y;
+        g->ships[i].guides[1].scale.x = .4f;
+        g->ships[i].guides[1].scale.y = .4f;
+        g->ships[i].guides[1].r = g->ships[j].r;
+        g->ships[i].guides[1].g = g->ships[j].g;
+        g->ships[i].guides[1].b = g->ships[j].b;
+        g->ships[i].guide_count = 2;
+        Ship_refreshGuides(g->ships+i);
     }
-    g->race_time_ms = -5000;
+    g->race_time_ms = -3000;
     g->race_step_ms = SDL_GetTicks();
 
     g->update = Game_updateCountdown;
@@ -165,6 +216,22 @@ static void Game_updateStartScreen(Game *g) {
 }
 void Game_update(Game *g) {
     g->update(g);
+    /* L'ordre compte. S'assurer que g->update(g) soit d'abord. */
+    switch(g->view_count) {
+    case 1:
+        View_mapPixelToCoords(g->views, &g->world_mouse_cursor, 
+                             &g->input.old_mouse_pos);
+        break;
+    case 2:
+        if(g->input.old_mouse_pos.x < g->window_size.x/2) {
+            View_mapPixelToCoords(g->views, &g->world_mouse_cursor, 
+                                 &g->input.old_mouse_pos);
+            break;
+        }
+        View_mapPixelToCoords(g->views+1, &g->world_mouse_cursor, 
+                             &g->input.old_mouse_pos);
+        break;
+    }
 }
 
 
@@ -285,15 +352,6 @@ static void Game_takeScreenshot(const Game *g) {
     else printf("Saved screenshot to %s\n", filename);
 }
 
-
-static void Game_quit(Game *g) {
-    if(g->fullscreen) {
-        g->fullscreen = false;
-        Game_reshape(g);
-    }
-    g->quit = true;
-}
-
 void Game_handleEvent(Game *g, const SDL_Event *e) {
     switch(e->type) {
     case SDL_QUIT:
@@ -358,6 +416,14 @@ void Game_handleEvent(Game *g, const SDL_Event *e) {
     }
 }
 
+static void Game_renderWorldMouseCursor(const Game *g) {
+    glColor3f(1,1,1);
+    glPointSize(4.f);
+    glBegin(GL_POINTS);
+    glVertex2f(g->world_mouse_cursor.x, g->world_mouse_cursor.y);
+    glEnd();
+}
+
 static void Game_renderView(const Game *g, size_t view_index) {
     const View *v = g->views + view_index;
 
@@ -372,18 +438,10 @@ static void Game_renderView(const Game *g, size_t view_index) {
         Ship_render(g->ships+i);
         if(i==view_index) {
             Map_renderCheckpoints(&g->map, g->ships[i].next_checkpoint_index);
-            Ship_renderGuide(g->ships+i);
+            Ship_renderGuides(g->ships+i);
         }
     }
-
-    Vec2 coords;
-    View_mapPixeltoCoords(v, &coords, &g->input.old_mouse_pos);
-    View_apply(v);
-    glColor3f(1,1,1);
-    glPointSize(3.f);
-    glBegin(GL_POINTS);
-    glVertex2f(coords.x, coords.y);
-    glEnd();
+    Game_renderWorldMouseCursor(g);
 }
 
 void Game_render(const Game *g) {

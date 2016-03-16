@@ -4,8 +4,8 @@
 #include <Utils.h>
 #include <View.h>
 
-void View_apply(const View *v) {
 
+static inline void View_applyProj(const View *v) {
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
 #define w (v->ortho_right)
@@ -13,27 +13,46 @@ void View_apply(const View *v) {
         -w*v->viewport_size.y/(float)v->viewport_size.x, 
          w*v->viewport_size.y/(float)v->viewport_size.x);
 #undef w
-
+}
+static inline void View_applyModelView(const View *v) {
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
     glScalef(v->zoom, v->zoom, 1);
     glRotatef(degf(-v->tilt), 0,0,1);
     glTranslatef(-v->center.x, -v->center.y, 0);
 }
+void View_apply(const View *v) {
+    View_applyProj(v);
+    View_applyModelView(v);
+}
 
-/* Bout de Code commun à View_mapPixeltoCoords() et View_mapCoordstoPixel(). */
+/* Matrice ModelView honnêtement bricolée seulement pour que
+ * View_mapPixelToCoords() marche. */
+static inline void View_applyTweakedModelView(const View *v) {
+    glMatrixMode(GL_MODELVIEW);
+    glLoadIdentity();
+    glScalef(v->zoom, v->zoom, 1);
+    glRotatef(degf(v->tilt), 0,0,1);
+    glTranslatef(-v->center.x, v->center.y, 0);
+}
+/* Bout de Code commun à View_mapPixelToCoords() et View_mapCoordsToPixel(). */
 static void View_prepareMapping(const View *v, GLdouble modelview[16], 
                                 GLdouble proj[16], GLint viewport[4]) {
+
     glMatrixMode(GL_PROJECTION);
     glPushMatrix();
-    glMatrixMode(GL_MODELVIEW);
-    glPushMatrix();
-    View_apply(v);
-    glGetDoublev(GL_MODELVIEW_MATRIX, modelview);
-    glGetDoublev(GL_PROJECTION_MATRIX, proj);
-    glMatrixMode(GL_PROJECTION);
+    {
+        View_applyProj(v);
+        glGetDoublev(GL_PROJECTION_MATRIX, proj);
+    }
     glPopMatrix();
+    
     glMatrixMode(GL_MODELVIEW);
+    glPushMatrix();
+    {
+        View_applyTweakedModelView(v);
+        glGetDoublev(GL_MODELVIEW_MATRIX, modelview);
+    }
     glPopMatrix();
     viewport[0] = v->viewport_pos.x;
     viewport[1] = v->viewport_pos.y;
@@ -41,7 +60,7 @@ static void View_prepareMapping(const View *v, GLdouble modelview[16],
     viewport[3] = v->viewport_size.y;
 }
 
-void View_mapPixeltoCoords(const View *v, Vec2 *coords, const Vec2u *pixel) {
+void View_mapPixelToCoords(const View *v, Vec2 *coords, const Vec2u *pixel) {
     GLdouble modelview[16], proj[16];
     GLint viewport[4];
     View_prepareMapping(v, modelview, proj, viewport);
@@ -53,7 +72,11 @@ void View_mapPixeltoCoords(const View *v, Vec2 *coords, const Vec2u *pixel) {
     coords->y = -cy;
 }
 
-void View_mapCoordstoPixel(const View *v, Vec2u *pixel, const Vec2 *coords) {
+/* FIXME cette fonction ne marche pas. 
+ * Je l'abandonne car en fin de compte je ne vois pas de cas d'utilisation
+ * concrêt. */
+/*
+void View_mapCoordsToPixel(const View *v, Vec2u *pixel, const Vec2 *coords) {
     GLdouble modelview[16], proj[16];
     GLint viewport[4];
     View_prepareMapping(v, modelview, proj, viewport);
@@ -62,19 +85,7 @@ void View_mapCoordstoPixel(const View *v, Vec2u *pixel, const Vec2 *coords) {
                modelview, proj, viewport, 
                &px, &py, &pz);
     pixel->x = px;
-    pixel->y = py;
-}
-
-/* Ancien code, au cas où : */
-/*
-static inline void View_mapPixelToCoords(Vec2 *out, const Vec2u *coord, 
-                           const Vec2u *win_size, const View *view) {
-    out->x = view->left + (view->right - view->left)*coord->x/(float)win_size->x;
-    out->y = view->top  - (view->top - view->bottom)*coord->y/(float)win_size->y;
-}
-static inline void View_mapCoordToPixels(Vec2u *out, const Vec2u *coord, 
-                          const Vec2u *win_size, const View *view) {
-    out->x = win_size->x*(coord->x-view->left)/(view->right - view->left);
-    out->y = win_size->y*(1.f - (coord->y + view->bottom)/(view->top - view->bottom));
+    pixel->y = v->viewport_size.y - py;
 }
 */
+

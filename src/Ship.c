@@ -3,17 +3,21 @@
 #include <Ship.h>
 #include <Utils.h>
 
-void Ship_renderGuide(const Ship *s) {
-    glColor3f(1.f,.0f,0.f);
-    glPushMatrix(); 
-    {
-        glTranslatef(s->pos.x, s->pos.y, 0);
-        glRotatef(s->objective_theta,0,0,1);
-        glTranslatef(0, 1.5f, 0);
-        glScalef(.6f, .6f, 1.f);
-        renderIsocelesTriangle(true);
-    } 
-    glPopMatrix();
+void Ship_renderGuides(const Ship *s) {
+    int i;
+    for(i=s->guide_count-1 ; i>=0 ; --i) {
+        const ShipGuide *guide = s->guides + i;
+        glColor3f(guide->r, guide->g, guide->b);
+        glPushMatrix(); 
+        {
+            glTranslatef(s->pos.x, s->pos.y, 0);
+            glRotatef(guide->theta,0,0,1);
+            glTranslatef(0, 1.5f, 0);
+            glScalef(guide->scale.x, guide->scale.y, 1.f);
+            renderIsocelesTriangle(true);
+        } 
+        glPopMatrix();
+    }
 }
 
 void Ship_renderBoundingVolumes(const Ship *s) {
