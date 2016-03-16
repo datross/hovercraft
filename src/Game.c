@@ -88,7 +88,8 @@ static void Game_updateRace(Game *g) {
             if(s->next_checkpoint_index >= g->map.checkpoint_count) {
                 printf("It's over ! Player %zu won.\n", i+1);
                 printf("elapsed time : %d ms\n", g->race_time_ms);
-                Game_quit(g);
+                /* Game_quit(g); */
+                s->next_checkpoint_index = 0; /* Bien sûr on retire ça après. */
             } else {
                 s->guides[0].pos.x = c->pos.x;
                 s->guides[0].pos.y = c->pos.y;
