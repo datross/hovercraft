@@ -24,7 +24,7 @@ all: $(BIN_PATH)/$(APP_BIN) data/screenshots
 data: 
 	@mkdir $@
 data/screenshots: data
-	@mkdir $@
+	@mkdir -p $@
 
 
 $(BIN_PATH)/$(APP_BIN): $(OBJ_FILES)
