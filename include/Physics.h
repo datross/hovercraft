@@ -1,6 +1,8 @@
 #ifndef PHYSICS_H
 #define PHYSICS_H
 
+#include <Vec.h>
+
 /* Structures géométriques de base */
 
 typedef Vec2* Polygon; /* Les coordonnées des sommets sont dans 

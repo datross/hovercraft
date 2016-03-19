@@ -178,11 +178,11 @@ static void Game_updateMapSelection(Game *g) {
     g->map.size.y = 1000.f;
     g->map.friction = 0.99999f;
     g->map.checkpoint_count = 3;
-    g->map.checkpoints[0].pos.x = 50.f;
+    g->map.checkpoints[0].pos.x = 250.f;
     g->map.checkpoints[0].pos.y = 50.f;
     g->map.checkpoints[0].radius = 20.f;
     g->map.checkpoints[1].pos.x = -20.f;
-    g->map.checkpoints[1].pos.y = 100.f;
+    g->map.checkpoints[1].pos.y = 200.f;
     g->map.checkpoints[1].radius = 30.f;
     g->map.checkpoints[2].pos.x = 0.f;
     g->map.checkpoints[2].pos.y = -50.f;

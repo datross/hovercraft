@@ -1,3 +1,4 @@
+#include <Physics.h>
 #include <Game.h>
 
 int Compute_force(Solid * solid, Force * force) {
