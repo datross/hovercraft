@@ -8,20 +8,22 @@ void MakeCircle(ConvexShape * shape, Vec2 position, float radius) {
     shape->shape.cercle.radius = radius;
 }
 
-void MakePolygon(ConvexShape * shape, Polygon polygon) {
+void MakeShape(ConvexShape * shape, Polygon polygon) {
     shape->type = POLYGON;
     shape->shape.polygon = polygon;
 }
 
 void MakeSolid(Solid *solid, ConvexShape collision_shapes[], 
                                         unsigned nb_collision_shapes,
-                                        float inertia_moment) {
+                                        float inertia_moment,
+                                        float total_mass) {
     solid->collision_shapes = collision_shapes;
     solid->nb_collision_shapes = nb_collision_shapes;
     solid->inertia_moment = inertia_moment;
     
     solid->position = solid->speed = MakeVec2(0,0);
     solid->rotation = solid->rotation_speed = 0;
+    solid->mass = total_mass;
     
     /* Translation de tous les points, par rapport au centre de gravité
      * qui va être calculé. */
@@ -100,14 +102,70 @@ void MakeSolid(Solid *solid, ConvexShape collision_shapes[],
                 break;
         }
     }
+    solid->next = NULL;
+    solid->prev = NULL;
 }
     
 
-int Compute_force(Solid * solid, Force * force) {
-    return 1;
+void AddForceWorld(PhysicWorld * world, Force * force) {
+    if(!world->forces_head) {
+        world->forces_head = force;
+        world->forces_tail = force;
+    } else {
+        world->forces_tail->next = force;
+        world->forces_tail = force;
+    }
+    force->next = NULL;
+}
+
+void AddSolidWorld(PhysicWorld * world, Solid * solid) {
+    Solid * tmp = world->solids;
+    world->solids = solid;
+    solid->prev = NULL;
+    solid->next = tmp;
+    if(tmp) tmp->prev = solid;
+}
+
+void Compute_force(Solid * solid, Force * force) {
+    return;
+}
+
+void Apply_force(Force * force, float duration) {
+    if(force->type == COUPLE) { /* Si la force est un couple. */
+        force->solid->rotation_speed += 
+            duration * force->force.x / force->solid->inertia_moment;
+    } else { /* C'est une force normale. */
+        /* Action sur le barycentre. */
+        force->solid->speed = AddVec2( force->solid->speed,
+                MulVec2( force->force, duration / force->solid->mass));
+        
+        /* Action sur la rotation. */
+        float pseudo_prod_vect = PseudoVectProd2(SubVec2(LocalToGlobal2(force->position, 
+                                                force->solid->position, force->solid->rotation),
+                                             force->solid->position), force->force);
+        force->solid->rotation_speed += duration * pseudo_prod_vect / force->solid->inertia_moment;
+    }
 }
 
 int Process_physics(PhysicWorld * world, float elapsed_time) {
+    /* Application de toutes les forces. */
+    for(; world->forces_head ; world->forces_head = world->forces_head->next) {
+        Apply_force(world->forces_head, elapsed_time);
+    }
+    world->forces_tail = NULL;
+    
+    /* Gestion des collisions blabla. */
+    
+    
+    /* Mise à jour des positions et rotations. */
+	Solid *tmp = world->solids;
+    for(; tmp; tmp = tmp->next) {
+        tmp->position = AddVec2(tmp->position,
+                                            tmp->speed);
+                                            
+        tmp->rotation += tmp->rotation_speed;
+    }
+    
     return 1;
 }
 

@@ -15,8 +15,8 @@
 void Ship_refreshGuides(Ship *s) {
     size_t i;
     for(i=0 ; i<s->guide_count ; ++i) {
-        Vec2 diff = {s->guides[i].pos.x - s->pos.x, 
-                     s->guides[i].pos.y - s->pos.y};
+        Vec2 diff = {s->guides[i].pos.x - s->physic_solid.position.x, 
+                     s->guides[i].pos.y - s->physic_solid.position.y};
         s->guides[i].theta = degf(atan2f(diff.y, diff.x))-90.f;
         s->guides[i].distance = sqrtf(diff.x*diff.x + diff.y*diff.y);
         /*
@@ -47,41 +47,45 @@ static void Game_updateRace(Game *g) {
         Ship *s = g->ships+i;
 
         if(g->input.players[i].accelerating) {
-            const float theta = s->tilt+M_PI/2.f;
-            s->accel.x = s->accel_multiplier*cosf(theta);
-            s->accel.y = s->accel_multiplier*sinf(theta);
-        } else memset(&s->accel, 0, sizeof(Vec2));
+            s->main_translate_force.force.x = s->accel_multiplier*cosf(s->physic_solid.rotation);
+            s->main_translate_force.force.y = s->accel_multiplier*sinf(s->physic_solid.rotation);
+            AddForceWorld(&(g->world), &(s->main_translate_force));
+        } 
 
-        if(g->input.players[i].left_tilting)
-            s->tilt += s->tilt_step;
-        if(g->input.players[i].right_tilting)
-            s->tilt -= s->tilt_step;
+        if(g->input.players[i].left_tilting) {
+			s->main_rotate_force.force.x = s->tilt_step;
+			AddForceWorld(&(g->world), &(s->main_rotate_force));
+        }
+        if(g->input.players[i].right_tilting) {
+			s->main_rotate_force.force.x = - s->tilt_step;
+			AddForceWorld(&(g->world), &(s->main_rotate_force));
+        }
 
-        s->tilt = fmodf(s->tilt, 2*M_PI);
+		Process_physics(&(g->world), g->tickrate);
 
         /* La friction joue beaucoup sur la vitesse maximale
          * factuellement atteignable des véhicules. */
-        s->vel.x *= s->friction * g->map.friction;
+        /*s->vel.x *= s->friction * g->map.friction;
         s->vel.y *= s->friction * g->map.friction;
         s->vel.x += s->accel.x;
         s->vel.y += s->accel.y;
         s->pos.x += s->vel.x;
-        s->pos.y += s->vel.y;
-        const float dist = sqrtf(s->vel.x*s->vel.x + s->vel.y*s->vel.y);
+        s->pos.y += s->vel.y;*/
+        const float dist = sqrtf(s->physic_solid.speed.x*s->physic_solid.speed.x + s->physic_solid.speed.y*s->physic_solid.speed.y);
         const float speed = 1000.f*dist/g->tickrate;
         if(speed > s->max_speed) {
             printf("Reaching max speed.\n");
             /* FIXME C'est une approximation qui est précise
              * avec 'max_speed' élevée, mais pas tant que ça
              * quand elle est faible. */
-            s->vel.x *= s->max_speed/speed;
-            s->vel.y *= s->max_speed/speed;
+            /*s->vel.x *= s->max_speed/speed;
+            s->vel.y *= s->max_speed/speed;*/
         }
 
         {
             const Checkpoint *c = g->map.checkpoints 
                                   + s->next_checkpoint_index;
-            Vec2 diff = { c->pos.x - s->pos.x, c->pos.y - s->pos.y };
+            Vec2 diff = { c->pos.x - s->physic_solid.position.x, c->pos.y - s->physic_solid.position.y };
             float dist = sqrtf(diff.x*diff.x + diff.y*diff.y);
             if(dist <= c->radius)
                 ++(s->next_checkpoint_index);
@@ -97,8 +101,8 @@ static void Game_updateRace(Game *g) {
        }
 
         const size_t j = (i+1)%(g->ship_count);
-        s->guides[1].pos.x = g->ships[j].pos.x;
-        s->guides[1].pos.y = g->ships[j].pos.y;
+        s->guides[1].pos.x = g->ships[j].physic_solid.position.x;
+        s->guides[1].pos.y = g->ships[j].physic_solid.position.y;
         Ship_refreshGuides(s);
 
         /*
@@ -108,9 +112,9 @@ static void Game_updateRace(Game *g) {
 
         if(i>=g->view_count)
             break;
-        g->views[i].center.x = s->pos.x;
-        g->views[i].center.y = s->pos.y;
-        g->views[i].tilt = s->tilt;
+        g->views[i].center.x = s->physic_solid.position.x;
+        g->views[i].center.y = s->physic_solid.position.y;
+        g->views[i].tilt = s->physic_solid.rotation;
         if(g->input.players[i].zooming_in && g->views[i].zoom < 6.f)
             g->views[i].zoom *= 1.1f;
         if(g->input.players[i].zooming_out && g->views[i].zoom > 0.02f)
@@ -142,9 +146,9 @@ static void Game_updateCountdown(Game *g) {
 static void Game_updatePreCountdown(Game *g) {
     size_t i;
     for(i=0 ; i<g->view_count ; ++i) {
-        g->views[i].center.x = g->ships[i].pos.x;
-        g->views[i].center.y = g->ships[i].pos.y;
-        g->views[i].tilt = g->ships[i].tilt;
+        g->views[i].center.x = g->ships[i].physic_solid.position.x;
+        g->views[i].center.y = g->ships[i].physic_solid.position.y;
+        g->views[i].tilt = g->ships[i].physic_solid.rotation;
         g->views[i].ortho_right = 8.f;
     }
     for(i=0 ; i<g->ship_count ; ++i) {
@@ -156,8 +160,8 @@ static void Game_updatePreCountdown(Game *g) {
         g->ships[i].guides[0].g = 0;
         g->ships[i].guides[0].b = 0;
         const size_t j = (i+1)%(g->ship_count);
-        g->ships[i].guides[1].pos.x = g->ships[j].pos.x;
-        g->ships[i].guides[1].pos.y = g->ships[j].pos.y;
+        g->ships[i].guides[1].pos.x = g->ships[j].physic_solid.position.x;
+        g->ships[i].guides[1].pos.y = g->ships[j].physic_solid.position.y;
         g->ships[i].guides[1].scale.x = .4f;
         g->ships[i].guides[1].scale.y = .4f;
         g->ships[i].guides[1].r = g->ships[j].r;
@@ -188,22 +192,23 @@ static void Game_updateMapSelection(Game *g) {
     g->map.checkpoints[2].pos.y = -50.f;
     g->map.checkpoints[2].radius = 40.f;
     g->map.checkpoint_count = 3;
-    g->ships[0].pos.x = -1.f;
-    g->ships[1].pos.x =  1.f;
 
+	g->world.solids       = NULL;
+	g->world.forces_head  = NULL;
+	g->world.forces_tail  = NULL;
+
+	unsigned i = 0;
+	for(; i < g->ship_count; ++i)
+    	AddSolidWorld(&(g->world), &(g->ships[i].physic_solid)); 
+	
     g->update = Game_updatePreCountdown;
     g->update(g);
 }
 static void Game_updateShipSelection(Game *g) {
     g->update = Game_updateMapSelection;
     memset(g->ships, 0, g->ship_count*sizeof(Ship));
-    g->ships[0].accel_multiplier = 0.01f;
-    g->ships[0].tilt_step = M_PI/45.f;
-    g->ships[0].friction = 0.997f;
-    g->ships[0].max_speed = 200.f;
-    memcpy(g->ships+1, g->ships, sizeof(Ship));
-    g->ships[0].r = 1.f;
-    g->ships[1].b = 1.f;
+    Ship_init(&(g->ships[0]));
+    Ship_init(&(g->ships[1]));
     g->update(g);
 }
 static void Game_updateMainMenu(Game *g) { 

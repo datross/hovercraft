@@ -8,6 +8,7 @@
 #include <View.h>
 #include <Map.h>
 #include <Ship.h>
+#include <Physics.h>
 
 typedef struct {
     unsigned accelerating  : 1;
@@ -44,6 +45,7 @@ struct Game {
     void (*update)(Game*);   /* privé. Appeler Game_update() à la place. */
     Map map;
     Ship ships[2];
+    PhysicWorld world;
     View views[2]; /* Nombre magique + taille fixe, mais pour le coup 
                       un malloc() est trop chiant. 
                       On va voir avec le temps. */
