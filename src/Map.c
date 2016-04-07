@@ -1,7 +1,54 @@
+#include <stdio.h>
 #include <stdbool.h>
+#include <string.h>
+#include <assert.h>
 #include <GL/gl.h>
 #include <Map.h>
 #include <Utils.h>
+
+#define STREQ(s1,s2) (!strncmp(s1,s2,strlen(s2)))
+
+void MapPreview_loadFromFile(MapPreview *m, FILE *file) {
+    char buf[BUFSIZ];
+    char *str;
+    for(;;) {
+        if(!fgets(buf, sizeof(buf), stdin))
+            break;
+        if(buf[0] == '#')
+            continue;
+        if(STREQ(buf, "name"))
+            strncpy(m->name, buf+5, MAP_NAME_LEN);
+        else if(STREQ(buf, "artwork")) {
+            str = buf + strlen("artwork") + 1;
+            *strchr(str, ' ') = '\0';
+            m->texture_id = Tex_loadFromFile(str);
+            assert(m->texture_id);
+            str += strlen(str)+1;
+            /* TODO */
+            //sscanf(str, "%u %u %u %u", );
+        }
+    }
+}
+
+void Map_loadFromFile(Map *m, FILE *file) {
+    char buf[BUFSIZ];
+    char *str;
+    for(;;) {
+        if(!fgets(buf, sizeof(buf), stdin))
+            break;
+        if(buf[0] == '#')
+            continue;
+        if(STREQ(buf, "name")) {}
+        else if(STREQ(buf, "size")) {}
+        else if(STREQ(buf, "terrain")) {}
+        else if(STREQ(buf, "color")) {}
+        else if(STREQ(buf, "friction")) {}
+        else if(STREQ(buf, "checkpoint_color")) {}
+        else if(STREQ(buf, "checkpoint_color_highlight")) {}
+        else if(STREQ(buf, "start")) {}
+        else if(STREQ(buf, "checkpoint")) {}
+    }
+}
 
 static void Map_renderCheckpoint(const Checkpoint *c) {
     glPushMatrix();

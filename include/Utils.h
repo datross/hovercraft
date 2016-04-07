@@ -3,6 +3,8 @@
 
 #include <stdbool.h>
 #include <math.h>
+#include <SDL/SDL.h>
+#include <SDL/SDL_image.h>
 #include <GL/gl.h>
 
 #define max(a,b) ((a)>(b) ? (a) : (b))
@@ -63,5 +65,37 @@ static inline void renderCircle(unsigned seg, bool full) {
     }
     glEnd();
 }
+
+static inline GLuint Tex_loadFromFile(const char *filename) {
+    SDL_Surface* image = IMG_Load(filename);
+    if(!image) {
+        fprintf(stderr, "Impossible de charger l'image %s\n", filename);
+        return 0;
+    }
+
+    GLuint textureId;
+    glGenTextures(1, &textureId);
+    glBindTexture(GL_TEXTURE_2D, textureId);
+    
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    
+    GLenum format;
+    switch(image->format->BytesPerPixel) {
+        case 1: format = GL_RED; break;
+        case 3: format = GL_RGB; break;
+        case 4: format = GL_RGBA; break;
+        default: fprintf(stderr, "Format des pixels de l'image "
+                                 "%s non pris en charge\n", filename);
+            return 0;
+    }
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, image->w, image->h, 
+                 0, format, GL_UNSIGNED_BYTE, image->pixels);
+    
+    SDL_FreeSurface(image);
+
+    return textureId;
+}
+
+
 
 #endif /* UTILS_H */

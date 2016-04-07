@@ -2,18 +2,18 @@
 #include <Game.h>
 
 
-void MakeCircle(ConvexShape * shape, Vec2 position, float radius) {
+void Circle_init(ConvexShape * shape, Vec2 position, float radius) {
     shape->type = CERCLE;
     shape->shape.cercle.position = position;
     shape->shape.cercle.radius = radius;
 }
 
-void MakeShape(ConvexShape * shape, Polygon polygon) {
+void Shape_init(ConvexShape * shape, Polygon polygon) {
     shape->type = POLYGON;
     shape->shape.polygon = polygon;
 }
 
-void MakeSolid(Solid *solid, ConvexShape collision_shapes[], 
+void Solid_init(Solid *solid, ConvexShape collision_shapes[], 
                                         unsigned nb_collision_shapes,
                                         float inertia_moment,
                                         float total_mass) {
@@ -107,7 +107,7 @@ void MakeSolid(Solid *solid, ConvexShape collision_shapes[],
 }
     
 
-void AddForceWorld(PhysicWorld * world, Force * force) {
+void World_addForce(PhysicWorld * world, Force * force) {
     if(!world->forces_head) {
         world->forces_head = force;
         world->forces_tail = force;
@@ -118,7 +118,7 @@ void AddForceWorld(PhysicWorld * world, Force * force) {
     force->next = NULL;
 }
 
-void AddSolidWorld(PhysicWorld * world, Solid * solid) {
+void World_addSolid(PhysicWorld * world, Solid * solid) {
     Solid * tmp = world->solids;
     world->solids = solid;
     solid->prev = NULL;

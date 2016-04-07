@@ -41,6 +41,7 @@ D'après l'énoncé :
 - Assets graphiques pour les maps;
 - Assets graphiques pour les véhicules;
 - Audio;
+- Mise en pause;
 
 # Pages suivantes (sans ordre)
 - Résolution de problèmes (connus et imprévus, liste des solutions possibles, nos choix);

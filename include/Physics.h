@@ -78,15 +78,15 @@ typedef struct {
 
 /* Fonctions */
 
-void MakeCircle(ConvexShape * shape, Vec2 position, float radius);
-void MakeShape(ConvexShape * shape, Polygon polygon);
-void MakeSolid(Solid *solid, ConvexShape collision_shapes[], 
+void Circle_init(ConvexShape * shape, Vec2 position, float radius);
+void Shape_init(ConvexShape * shape, Polygon polygon);
+void Solid_init(Solid *solid, ConvexShape collision_shapes[], 
                                         unsigned nb_collision_shapes,
                                         float inertia_moment,
                                         float mass);
 
-void AddForceWorld(PhysicWorld * world, Force * force);
-void AddSolidWorld(PhysicWorld * world, Solid * solid); 
+void World_addForce(PhysicWorld * world, Force * force);
+void World_addSolid(PhysicWorld * world, Solid * solid); 
 /* Calcule la force qu'exerce un solide en un point,
  * de part sa vitesse et sa rotation. */
 void Compute_force(Solid * solid, Force * force);

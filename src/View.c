@@ -18,7 +18,7 @@ static inline void View_applyModelView(const View *v) {
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
     glScalef(v->zoom, v->zoom, 1);
-    glRotatef(degf(-v->tilt), 0,0,1);
+    glRotatef(degf(-v->tilt+M_PI/2.f), 0,0,1);
     glTranslatef(-v->center.x, -v->center.y, 0);
 }
 void View_apply(const View *v) {
@@ -32,7 +32,7 @@ static inline void View_applyTweakedModelView(const View *v) {
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
     glScalef(v->zoom, v->zoom, 1);
-    glRotatef(degf(v->tilt), 0,0,1);
+    glRotatef(degf(v->tilt-M_PI/2.f), 0,0,1);
     glTranslatef(-v->center.x, v->center.y, 0);
 }
 /* Bout de Code commun à View_mapPixelToCoords() et View_mapCoordsToPixel(). */

@@ -49,28 +49,29 @@ static void Game_updateRace(Game *g) {
         if(g->input.players[i].accelerating) {
             s->main_translate_force.force.x = s->accel_multiplier*cosf(s->physic_solid.rotation);
             s->main_translate_force.force.y = s->accel_multiplier*sinf(s->physic_solid.rotation);
-            AddForceWorld(&(g->world), &(s->main_translate_force));
+            World_addForce(&(g->world), &(s->main_translate_force));
         } 
 
         if(g->input.players[i].left_tilting) {
 			s->main_rotate_force.force.x = s->tilt_step;
-			AddForceWorld(&(g->world), &(s->main_rotate_force));
+			World_addForce(&(g->world), &(s->main_rotate_force));
         }
         if(g->input.players[i].right_tilting) {
 			s->main_rotate_force.force.x = - s->tilt_step;
-			AddForceWorld(&(g->world), &(s->main_rotate_force));
+			World_addForce(&(g->world), &(s->main_rotate_force));
         }
 
 		Process_physics(&(g->world), g->tickrate);
 
         /* La friction joue beaucoup sur la vitesse maximale
          * factuellement atteignable des véhicules. */
-        /*s->vel.x *= s->friction * g->map.friction;
-        s->vel.y *= s->friction * g->map.friction;
-        s->vel.x += s->accel.x;
-        s->vel.y += s->accel.y;
-        s->pos.x += s->vel.x;
-        s->pos.y += s->vel.y;*/
+        
+        s->main_translation_friction.force = MulVec2(s->physic_solid.speed, -s->friction);
+        s->main_rotation_friction.force.x = -s->friction * s->physic_solid.rotation_speed;
+ 
+        World_addForce(&(g->world), &(s->main_translation_friction));
+        World_addForce(&(g->world), &(s->main_rotation_friction));
+
         const float dist = sqrtf(s->physic_solid.speed.x*s->physic_solid.speed.x + s->physic_solid.speed.y*s->physic_solid.speed.y);
         const float speed = 1000.f*dist/g->tickrate;
         if(speed > s->max_speed) {
@@ -199,7 +200,7 @@ static void Game_updateMapSelection(Game *g) {
 
 	unsigned i = 0;
 	for(; i < g->ship_count; ++i)
-    	AddSolidWorld(&(g->world), &(g->ships[i].physic_solid)); 
+    	World_addSolid(&(g->world), &(g->ships[i].physic_solid)); 
 	
     g->update = Game_updatePreCountdown;
     g->update(g);
@@ -281,6 +282,7 @@ static void Game_resizeViewports(Game *g) {
     }
 }
 void Game_reshape(Game *g) {
+    glEnable(GL_TEXTURE_2D);
     if(g->fullscreen) {
         /* La doc ne dit pas s'il faut libérer le tableau à la fin. */
         SDL_Rect **modes = SDL_ListModes(NULL, SDL_FULLSCREEN);

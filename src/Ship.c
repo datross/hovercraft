@@ -7,7 +7,7 @@ void Ship_init(Ship *s) {
     memset(s, 0, sizeof(Ship));
     s->accel_multiplier = 0.0005f;
     s->tilt_step = 0.0001f;
-    s->friction = 0.997f;
+    s->friction = 0.005f;
     s->max_speed = 200.f;
     
     /* Temporaire */
@@ -20,17 +20,22 @@ void Ship_init(Ship *s) {
     polygon.vertices[3] = MakeVec2(0, 1);
     
     ConvexShape shape;
-    MakeShape(&shape, polygon);
+    Shape_init(&shape, polygon);
     
-    MakeSolid(&(s->physic_solid), &shape, 1, 1, 1);
+    Solid_init(&(s->physic_solid), &shape, 1, 1, 1);
 
 	s->physic_solid.rotation = M_PI / 2.;
 
-	s->main_translate_force.type = NORMAL;
+    s->main_translate_force.type = NORMAL;
 	s->main_translate_force.solid = &(s->physic_solid);
 	s->main_translate_force.position = MakeVec2(0,0);
 	s->main_rotate_force.type = COUPLE;
 	s->main_rotate_force.solid = &(s->physic_solid);
+    s->main_translation_friction.type = NORMAL;
+	s->main_translation_friction.solid = &(s->physic_solid);
+	s->main_translation_friction.position = MakeVec2(0,0);
+	s->main_rotation_friction.type = COUPLE;
+	s->main_rotation_friction.solid = &(s->physic_solid);
 	
     
     s->r = 1.f;

@@ -10,6 +10,12 @@ typedef struct {
 
 #define MAX_CHECKPOINT_COUNT 32
 
+#define MAP_NAME_LEN 128
+typedef struct {
+    char name[MAP_NAME_LEN];
+    GLuint texture_id;
+} MapPreview;
+
 typedef struct {
     Vec2 size; /* Bords, en coordonnées monde. */
     float friction;
@@ -20,5 +26,7 @@ typedef struct {
 
 void Map_render(const Map *m);
 void Map_renderCheckpoints(const Map *m, size_t next_checkpoint_index);
+void Map_loadFromFile(Map *m, FILE *file);
+void MapPreview_loadFromFile(MapPreview *m, FILE *file);
 
 #endif /* MAP_H */

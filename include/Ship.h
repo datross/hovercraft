@@ -28,6 +28,8 @@ typedef struct {
     size_t next_checkpoint_index;
     Force main_translate_force;
     Force main_rotate_force;
+    Force main_translation_friction;
+    Force main_rotation_friction;
 } Ship;
 
 void Ship_init(Ship *s);
