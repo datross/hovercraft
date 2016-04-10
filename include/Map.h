@@ -2,6 +2,8 @@
 #define MAP_H
 
 #include <Vec.h>
+#include <GL/glu.h>
+#include <GL/gl.h>
 
 typedef struct {
     Vec2 pos;
