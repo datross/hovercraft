@@ -7,46 +7,76 @@
 #include <Utils.h>
 
 #define STREQ(s1,s2) (!strncmp(s1,s2,strlen(s2)))
+#define STR(X) #X
+#define XSTR(X) STR(X)
 
 void MapPreview_loadFromFile(MapPreview *m, FILE *file) {
     char buf[BUFSIZ];
-    char *str;
+    char str[MAP_NAME_LEN];
     for(;;) {
         if(!fgets(buf, sizeof(buf), stdin))
             break;
         if(buf[0] == '#')
             continue;
         if(STREQ(buf, "name"))
-            strncpy(m->name, buf+5, MAP_NAME_LEN);
+            scanf("%*s %"XSTR(MAP_NAME_LEN)"s", m->name);
         else if(STREQ(buf, "artwork")) {
-            str = buf + strlen("artwork") + 1;
-            *strchr(str, ' ') = '\0';
-            m->texture_id = Tex_loadFromFile(str);
+            unsigned x, y, w, h;
+			scanf("%*s %"XSTR(MAP_NAME_LEN)"s %u %u %u %u", str, &x, &y, &w, &h);
+			m->texture_id = Tex_loadFromFile(str);
             assert(m->texture_id);
-            str += strlen(str)+1;
-            /* TODO */
-            //sscanf(str, "%u %u %u %u", );
+            // TODO set texture clip
+
+
+            break;
         }
     }
 }
 
 void Map_loadFromFile(Map *m, FILE *file) {
     char buf[BUFSIZ];
-    char *str;
+    char str[MAP_NAME_LEN];
+    char num_player = 0;
+    m->checkpoint_count = 0;
+
     for(;;) {
         if(!fgets(buf, sizeof(buf), stdin))
             break;
         if(buf[0] == '#')
             continue;
-        if(STREQ(buf, "name")) {}
-        else if(STREQ(buf, "size")) {}
-        else if(STREQ(buf, "terrain")) {}
-        else if(STREQ(buf, "color")) {}
-        else if(STREQ(buf, "friction")) {}
-        else if(STREQ(buf, "checkpoint_color")) {}
-        else if(STREQ(buf, "checkpoint_color_highlight")) {}
-        else if(STREQ(buf, "start")) {}
-        else if(STREQ(buf, "checkpoint")) {}
+            
+             if(STREQ(buf, "name")) scanf("%*s %"XSTR(MAP_NAME_LEN)"s", m->name);
+        else if(STREQ(buf, "size")) scanf("%*s %f %f", &(m->size.x), &(m->size.y));
+        else if(STREQ(buf, "terrain")) {
+			unsigned x, y, w, h;
+			scanf("%*s %"XSTR(MAP_NAME_LEN)"s %u %u %u %u", str, &x, &y, &w, &h);
+			m->texture_terrain_id = Tex_loadFromFile(str);
+            assert(m->texture_terrain_id);
+            // TODO set texture clip
+        }
+        else if(STREQ(buf, "color")) scanf("%*s %f %f %f", &(m->color.r), &(m->color.g), &(m->color.b));
+        else if(STREQ(buf, "friction")) scanf("%*s %f", &(m->friction));
+        else if(STREQ(buf, "checkpoint_color")) scanf("%*s %f %f %f", &(m->color_checkpoint.r),
+                                                      &(m->color_checkpoint.g), &(m->color_checkpoint.b));
+        else if(STREQ(buf, "checkpoint_color_highlight")) scanf("%*s %f %f %f",
+                                                                &(m->color_checkpoint_highlight.r),
+                                                                &(m->color_checkpoint_highlight.g),
+                                                                &(m->color_checkpoint_highlight.b));
+        else if(STREQ(buf, "start")) {
+            if(num_player == 1) break;
+			// Pourquoi 4 nombres pour chaque joueur ?
+
+			++num_player;
+        }
+        else if(STREQ(buf, "checkpoint")) {
+			if(m->checkpoint_count >= MAX_CHECKPOINT_COUNT) break;
+
+			scanf("%*s %f %f %f", &(m->checkpoints[m->checkpoint_count].pos.x),
+								  &(m->checkpoints[m->checkpoint_count].pos.y),
+								  &(m->checkpoints[m->checkpoint_count].radius));
+
+			++(m->checkpoint_count);								  
+        }
     }
 }
 

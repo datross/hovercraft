@@ -11,6 +11,10 @@
 #define degf(a) ((a)*180.f/M_PI)
 #define radf(a) ((a)*M_PI/180.f)
 
+typedef struct {
+    float r, g, b;
+} Color3;
+
 static inline void renderSquare(bool full) {
     glBegin(full ? GL_QUADS : GL_LINE_LOOP);
     glVertex2f(-.5, -.5);

@@ -2,6 +2,7 @@
 #define MAP_H
 
 #include <Vec.h>
+#include <Utils.h>
 #include <GL/glu.h>
 #include <GL/gl.h>
 
@@ -19,10 +20,14 @@ typedef struct {
 } MapPreview;
 
 typedef struct {
+    char name[MAP_NAME_LEN];
     Vec2 size; /* Bords, en coordonnées monde. */
+    GLuint texture_terrain_id;
     float friction;
-    Checkpoint checkpoints[MAX_CHECKPOINT_COUNT];
+    Checkpoint checkpoints[MAX_CHECKPOINT_COUNT]; 
+    Color3 color, color_checkpoint, color_checkpoint_highlight;
     size_t checkpoint_count;
+    Vec2 start_player[2];
     /* TODO checkpoints, obstacles, etc. */
 } Map;
 
