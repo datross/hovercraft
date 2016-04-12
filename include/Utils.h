@@ -78,6 +78,7 @@ static inline GLuint Tex_loadFromFile(const char *filename) {
     glBindTexture(GL_TEXTURE_2D, textureId);
     
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     
     GLenum format;
     switch(image->format->BytesPerPixel) {
