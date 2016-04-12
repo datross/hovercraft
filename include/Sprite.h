@@ -9,7 +9,7 @@ typedef struct {
     GLuint tex_id;
 } Sprite;
 
-void Sprite_render(const Sprite *s) {
+static inline void Sprite_render(const Sprite *s) {
     glBindTexture(GL_TEXTURE_2D, s->tex_id);
     glPushMatrix();
     {
