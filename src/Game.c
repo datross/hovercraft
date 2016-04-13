@@ -114,7 +114,8 @@ static void Game_updateRace(Game *g) {
             break;
         g->views[i].center.x = s->physic_solid.position.x;
         g->views[i].center.y = s->physic_solid.position.y;
-        g->views[i].tilt = atan(s->physic_solid.speed.y / s->physic_solid.speed.x);
+        //g->views[i].tilt = atan(s->physic_solid.speed.y / s->physic_solid.speed.x);
+        g->views[i].tilt = s->physic_solid.rotation;
         if(g->input.players[i].zooming_in && g->views[i].zoom < 6.f)
             g->views[i].zoom *= 1.1f;
         if(g->input.players[i].zooming_out && g->views[i].zoom > 0.02f)
@@ -178,6 +179,25 @@ static void Game_updatePreCountdown(Game *g) {
     g->update(g);
 }
 static void Game_updateMapSelection(Game *g) {
+/*
+    static unsigned selected_map_index = 0;
+#define PRESSED(ipt) (g->input.players[current_player_index].ipt \
+                    < g->input.players_old[current_player_index].ipt)
+    if(PRESSED(left_tilting) || PRESSED(zooming_in)) {
+        if(selected_map_index>0)
+            --selected_map_index;
+        else selected_map_index = g->map_count-1;
+    }
+    if(PRESSED(right_tilting) || PRESSED(zooming_out)) {
+        ++selected_map_index;
+        selected_map_index %= g->map_count;
+    }
+#undef PRESSED
+
+    Puis afficher la bonne map...
+*/
+
+
     memset(&g->map, 0, sizeof(Map));
     g->map.size.x = 2000.f;
     g->map.size.y = 1000.f;
