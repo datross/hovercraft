@@ -208,13 +208,16 @@ static void Game_updateMapSelection(Game *g) {
 static void Game_updateShipSelection(Game *g) {
     g->update = Game_updateMapSelection;
     memset(g->ships, 0, g->ship_count*sizeof(Ship));
-    Ship_init(&(g->ships[0]));
-    Ship_init(&(g->ships[1]));
+    size_t i;
+    for(i=0 ; i<g->ship_count ; ++i)
+        Ship_init(g->ships + i);
     g->update(g);
 }
 static void Game_updateMainMenu(Game *g) { 
+    static unsigned nplayers = 1;
     g->update = Game_updateShipSelection;
-    g->ship_count = 2;
+    g->ship_count = 1;
+    g->view_count = 1;
     g->update(g);
 }
 static void Game_updateStartScreen(Game *g) {
@@ -251,7 +254,7 @@ void Game_init(Game *g) {
     memset(g->views, 0, 2*sizeof(View));
     g->views[0].zoom = 1.f;
     g->views[1].zoom = 1.f;
-    g->view_count = 2;
+    g->view_count = 1;
 }
 void Game_deinit(Game *g) {
     /* Rien pour l'instant. */
