@@ -61,7 +61,6 @@ static void Game_updateRace(Game *g) {
 			World_addForce(&(g->world), &(s->main_rotate_force));
         }
 
-		Process_physics(&(g->world), g->tickrate);
 
         /* La friction joue beaucoup sur la vitesse maximale
          * factuellement atteignable des véhicules. */
@@ -122,6 +121,7 @@ static void Game_updateRace(Game *g) {
             g->views[i].zoom *= .9f;
         /* if(i==0)printf("zoom : %f\n", g->views[i].zoom); */
     }
+	Process_physics(&(g->world), g->tickrate);
 }
 static void Game_updateCountdown(Game *g) {
 
