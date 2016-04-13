@@ -153,6 +153,7 @@ int Process_physics(PhysicWorld * world, float elapsed_time) {
         Apply_force(world->forces_head, elapsed_time);
     }
     world->forces_tail = NULL;
+    world->forces_head = NULL;
     
     /* Gestion des collisions blabla. */
     

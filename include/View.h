@@ -3,6 +3,10 @@
 
 #include <string.h>
 #include <Vec.h>
+#include <Ship.h>
+
+#define VIEW_FOLLOW_SPEED
+#define VIEW_
 
 typedef struct {
     Vec2u viewport_pos, viewport_size; /* Window coordinates */

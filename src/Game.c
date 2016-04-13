@@ -114,7 +114,7 @@ static void Game_updateRace(Game *g) {
             break;
         g->views[i].center.x = s->physic_solid.position.x;
         g->views[i].center.y = s->physic_solid.position.y;
-        g->views[i].tilt = s->physic_solid.rotation;
+        g->views[i].tilt = atan(s->physic_solid.speed.y / s->physic_solid.speed.x);
         if(g->input.players[i].zooming_in && g->views[i].zoom < 6.f)
             g->views[i].zoom *= 1.1f;
         if(g->input.players[i].zooming_out && g->views[i].zoom > 0.02f)
@@ -137,7 +137,7 @@ static void Game_updateCountdown(Game *g) {
     g->race_time_ms += new_ms - g->race_step_ms;
     g->race_step_ms = new_ms;
     if(1-g->race_time_ms > 0) {
-        printf("%d...\n", 1-g->race_time_ms/1000);
+        //printf("%d...\n", 1-g->race_time_ms/1000);
         return;
     }
     puts("Go!!!");

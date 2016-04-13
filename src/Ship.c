@@ -6,8 +6,8 @@
 void Ship_init(Ship *s) {
     memset(s, 0, sizeof(Ship));
     s->accel_multiplier = 0.0005f;
-    s->tilt_step = 0.0001f;
-    s->friction = 0.005f;
+    s->tilt_step = 0.0003f;
+    s->friction = 0.001f;
     s->max_speed = 200.f;
     
     /* Temporaire */
