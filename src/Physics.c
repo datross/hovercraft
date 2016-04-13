@@ -29,7 +29,8 @@ void Solid_init(Solid *solid, ConvexShape collision_shapes[],
      * qui va être calculé. */
     unsigned i = 0, j;
     Vec2 mass_center = MakeVec2(0, 0);
-    float mass;
+    float mass = .001f; //EDIT par moi, au vu d'un warning de valeur 
+    //non-initialisée, et pour éviter une potentielle division par zéro.
     for(; i < solid->nb_collision_shapes; ++i) {
         switch(solid->collision_shapes[i].type) {
             case CERCLE: {
