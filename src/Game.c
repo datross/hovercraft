@@ -206,23 +206,60 @@ static void Game_updateMapSelection(Game *g) {
     g->update(g);
 }
 static void Game_updateShipSelection(Game *g) {
-    g->update = Game_updateMapSelection;
-    memset(g->ships, 0, g->ship_count*sizeof(Ship));
-    Ship_init(&(g->ships[0]));
-    Ship_init(&(g->ships[1]));
-    g->update(g);
+    static unsigned current_player_index = 0;
+    static unsigned selected_ship_index = 0;
+#define PRESSED(ipt) (g->input.players[current_player_index].ipt \
+                    < g->input.players_old[current_player_index].ipt)
+    if(PRESSED(left_tilting))
+        if(selected_ship_index==1 || selected_ship_index==3)
+            --selected_ship_index;
+    if(PRESSED(right_tilting))
+        if(selected_ship_index==0 || selected_ship_index==2)
+            ++selected_ship_index;
+    if(PRESSED(zooming_in))
+        if(selected_ship_index==2 || selected_ship_index==3)
+            selected_ship_index -= 2;
+    if(PRESSED(zooming_out))
+        if(selected_ship_index==0 || selected_ship_index==1)
+            selected_ship_index += 2;
+#undef PRESSED
+
+    /* Changer la position du curseur en fonction de selected_ship_index.
+     * Changer sa couleur en fonction de current_player_index ? */
+
+    memset(g->ships + current_player_index, 0, sizeof(Ship));
+    Ship_init(g->ships + current_player_index);
+
+    if(current_player_index < g->ship_count-1) {
+        ++current_player_index;
+        g->update = Game_updateShipSelection;
+    } else {
+        current_player_index = 0;
+        g->update = Game_updateMapSelection;
+    }
 }
 static void Game_updateMainMenu(Game *g) { 
-    g->update = Game_updateShipSelection;
-    g->ship_count = 2;
-    g->update(g);
+    g->update = Game_updateShipSelection; /* A retirer plus tard. */
+/*
+    if(g->input.players[0].accelerating < g->input.players_old[0].accelerating)
+        g->update = Game_updateShipSelection;
+
+    if(g->input.players[0].left_tilting  < g->input.players_old[0].left_tilting
+    || g->input.players[0].right_tilting < g->input.players_old[0].right_tilting
+    || g->input.players[0].zooming_in    < g->input.players_old[0].zooming_in
+    || g->input.players[0].zooming_out   < g->input.players_old[0].zooming_out)
+        g->ship_count = (g->ship_count==1 ? 2 : 1);
+*/
+    /* Changer la position du curseur en fonction de g->ship_count. */
 }
 static void Game_updateStartScreen(Game *g) {
+    g->ship_count = 1;
     g->update = Game_updateMainMenu;
     g->update(g);
 }
 void Game_update(Game *g) {
     g->update(g);
+    memcpy(g->input.players_old, g->input.players, 2*sizeof(PlayerInputState));
     /* L'ordre compte. S'assurer que g->update(g) soit d'abord. */
     switch(g->view_count) {
     case 1:
@@ -251,7 +288,9 @@ void Game_init(Game *g) {
     memset(g->views, 0, 2*sizeof(View));
     g->views[0].zoom = 1.f;
     g->views[1].zoom = 1.f;
-    g->view_count = 2;
+    g->view_count = 1;
+    memset(g->input.players_old, 0, 2*sizeof(PlayerInputState));
+    memset(g->input.players, 0, 2*sizeof(PlayerInputState));
 }
 void Game_deinit(Game *g) {
     /* Rien pour l'instant. */

@@ -21,6 +21,7 @@ typedef struct {
 
 typedef struct {
     PlayerInputState players[2];
+    PlayerInputState players_old[2];
     Vec2u old_mouse_pos;
     unsigned mouse_down : 1;
     unsigned reserved   : 7;
