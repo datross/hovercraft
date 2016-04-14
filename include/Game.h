@@ -9,6 +9,7 @@
 #include <Map.h>
 #include <Ship.h>
 #include <Physics.h>
+#include <Sprite.h>
 
 typedef struct {
     unsigned accelerating  : 1;
@@ -26,6 +27,21 @@ typedef struct {
     unsigned mouse_down : 1;
     unsigned reserved   : 7;
 } InputState;
+
+typedef struct {
+    Sprite bg, title, p1, p2;
+    unsigned choice : 1;
+    unsigned reserved : 7;
+} MainMenu;
+
+typedef struct {
+    Sprite bg;
+    Sprite artworks[MAX_SHIPS][MAX_PALETTES];
+    Sprite icons[MAX_SHIPS][MAX_PALETTES];
+    unsigned player_index : 1;
+    unsigned selected_ship_index : 2;
+    unsigned reserved : 5;
+} ShipMenu;
 
 typedef struct Game Game; /* Déclaration pour le pointeur de fonction */
 struct Game {
