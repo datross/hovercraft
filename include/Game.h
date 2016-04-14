@@ -65,8 +65,8 @@ typedef struct {
 } FadeTransition;
 
 typedef struct {
-    uint32_t race_step_ms;
-     int32_t race_time_ms;
+    uint32_t step_ms;
+     int32_t time_ms;
 } RaceState;
 
 typedef struct Game Game; /* Déclaration pour le pointeur de fonction */

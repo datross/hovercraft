@@ -30,8 +30,8 @@ static void Game_updateMainMenu(Game *g); /* prototype pour Race(). */
 static void Game_updateRace(Game *g) { 
 
     uint32_t new_ms = SDL_GetTicks();
-    g->race_time_ms += new_ms - g->race_step_ms;
-    g->race_step_ms = new_ms;
+    g->race_state.time_ms += new_ms - g->race_state.step_ms;
+    g->race_state.step_ms = new_ms;
 
     size_t i;
     for(i=0 ; i<g->ship_count ; ++i) {
@@ -82,7 +82,7 @@ static void Game_updateRace(Game *g) {
                 ++(s->next_checkpoint_index);
             if(s->next_checkpoint_index >= g->map.checkpoint_count) {
                 printf("It's over ! Player %zu won.\n", i+1);
-                printf("elapsed time : %d ms\n", g->race_time_ms);
+                printf("elapsed time : %d ms\n", g->race_state.time_ms);
                 /* Game_quit(g); */
                 s->next_checkpoint_index = 0; /* Bien sûr on retire ça après. */
             } else {
@@ -126,10 +126,10 @@ static void Game_updateCountdown(Game *g) {
     }
 
     uint32_t new_ms = SDL_GetTicks();
-    g->race_time_ms += new_ms - g->race_step_ms;
-    g->race_step_ms = new_ms;
-    if(1-g->race_time_ms > 0) {
-        //printf("%d...\n", 1-g->race_time_ms/1000);
+    g->race_state.time_ms += new_ms - g->race_state.step_ms;
+    g->race_state.step_ms = new_ms;
+    if(1-g->race_state.time_ms > 0) {
+        //printf("%d...\n", 1-g->race_state.time_ms/1000);
         return;
     }
     puts("Go!!!");
@@ -163,8 +163,8 @@ static void Game_updatePreCountdown(Game *g) {
         g->ships[i].guide_count = 2;
         Ship_refreshGuides(g->ships+i);
     }
-    g->race_time_ms = -3000;
-    g->race_step_ms = SDL_GetTicks();
+    g->race_state.time_ms = -3000;
+    g->race_state.step_ms = SDL_GetTicks();
 
     g->update = Game_updateCountdown;
     g->update(g);
