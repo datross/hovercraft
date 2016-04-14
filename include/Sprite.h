@@ -5,28 +5,17 @@
 #include <Vec.h>
 
 typedef struct {
-    Vec2 rect_pos, rect_size;
-    GLuint tex_id;
+    /* Privé. top-left, bottom-right, du rectangle-portion de texture.  */
+    Vec2 texcoord_tl, texcoord_br;
+    GLuint tex_id; /* Privé. */
+    /* Le seul champ public. Moitié de la taille en coordonnées monde. */
+    Vec2 half_size;
 } Sprite;
 
-static inline void Sprite_render(const Sprite *s) {
-    glBindTexture(GL_TEXTURE_2D, s->tex_id);
-    glPushMatrix();
-    {
-        glBegin(GL_QUADS);
-        glTexCoord2f(s->rect_pos.x, s->rect_pos.y);
-        glVertex2f(-.5,  .5);
-        glTexCoord2f(s->rect_pos.x + s->rect_size.x, s->rect_pos.y);
-        glVertex2f( .5,  .5);
-        glTexCoord2f(s->rect_pos.x, s->rect_pos.y + s->rect_size.y);
-        glVertex2f(-.5, -.5);
-        glTexCoord2f(s->rect_pos.x + s->rect_size.x, 
-                     s->rect_pos.y + s->rect_size.y);
-        glVertex2f( .5, -.5);
-        glEnd();
-    }
-    glPopMatrix();
-    glBindTexture(GL_TEXTURE_2D, 0);
-}
+void Sprite_build(Sprite *s, GLuint tex_id, Vec2u rect_pos, 
+                  Vec2u rect_size, Vec2u img_size);
+void Sprite_render(const Sprite *s);
+void Sprite_resizeToHeight(Sprite *s, float h);
+void Sprite_resizeToWidth(Sprite *s, float w);
 
 #endif /* SPRITE_H */

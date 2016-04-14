@@ -66,11 +66,16 @@ void Game_init(Game *g);
 void Game_deinit(Game *g);
 void Game_reshape(Game *g);
 void Game_handleEvent(Game *g, const SDL_Event *e);
+/* Elle est appellée automatiquement par handleEvenet(). */
+void Game_takeScreenshot(const Game *g);
 /* Mise à jour de la logique du jeu. Découplée de la gestion d'évènements. */
 void Game_update(Game *g);
 /* Affichage du jeu. 
  * Que des draw calls : pas de glClear() ni de SwapBuffers(). */
 void Game_render(const Game *g);
 
+/* Cette fonction est privée. Elle sert juste de passerelle entre 
+ * Game.c et Game_logic.c */
+void Game_updateStartScreen(Game *g);
 
 #endif /* GAME_H */
