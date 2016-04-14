@@ -34,14 +34,40 @@ typedef struct {
     unsigned reserved : 7;
 } MainMenu;
 
+#define MAX_SHIPS 4
+#define MAX_PALETTES 6
+
 typedef struct {
     Sprite bg;
-    Sprite artworks[MAX_SHIPS][MAX_PALETTES];
-    Sprite icons[MAX_SHIPS][MAX_PALETTES];
+    Sprite ship_artworks[MAX_SHIPS][MAX_PALETTES];
+    Sprite ship_icons[MAX_SHIPS][MAX_PALETTES];
     unsigned player_index : 1;
-    unsigned selected_ship_index : 2;
-    unsigned reserved : 5;
+    unsigned selected_ship_index : 3;
+    unsigned reserved : 4;
 } ShipMenu;
+
+#define MAX_MAPS 32
+
+typedef struct {
+    Sprite bg;
+    Sprite map_artworks[MAX_MAPS];
+    Sprite map_names[MAX_MAPS];
+    size_t map_count, selected_map_index;
+} MapMenu;
+
+typedef struct {
+    Sprite top, bottom;
+    Vec2 top_pos, bottom_pos;
+} ClapTransition;
+
+typedef struct {
+    float opacity;
+} FadeTransition;
+
+typedef struct {
+    uint32_t race_step_ms;
+     int32_t race_time_ms;
+} RaceState;
 
 typedef struct Game Game; /* Déclaration pour le pointeur de fonction */
 struct Game {
@@ -71,9 +97,13 @@ struct Game {
     unsigned quit       : 1;
     unsigned fullscreen : 1;
     unsigned reserved   : 2; /* Padding pour que le bitfield fasse un octet. */
-    uint32_t race_step_ms;
-     int32_t race_time_ms;
     Vec2 world_mouse_cursor;
+    MainMenu main_menu;
+    ShipMenu ship_menu;
+    MapMenu map_menu;
+    ClapTransition clap_transition;
+    FadeTransition fade_transition;
+    RaceState race_state;
 };
 
 /* Game_init() seul ne suffit pas à afficher le jeu. 
