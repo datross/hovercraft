@@ -10,6 +10,11 @@
 #define STR(X) #X
 #define XSTR(X) STR(X)
 
+/* Le premier argument est le nombre d'items censés etre lus.  */
+#define CHECKED_SCANF(cnt, ...) \
+    do {if(scanf(__VA_ARGS__) < cnt) \
+        fprintf(stderr, "%s:%u: Erreur de parsing.\n", __FILE__, __LINE__); } while(0)
+
 void MapPreview_loadFromFile(MapPreview *m, FILE *file) {
     char buf[BUFSIZ];
     char str[MAP_NAME_LEN];
@@ -19,15 +24,13 @@ void MapPreview_loadFromFile(MapPreview *m, FILE *file) {
         if(buf[0] == '#')
             continue;
         if(STREQ(buf, "name"))
-            scanf("%*s %"XSTR(MAP_NAME_LEN)"s", m->name);
+            CHECKED_SCANF(1, "%*s %"XSTR(MAP_NAME_LEN)"s", m->name);
         else if(STREQ(buf, "artwork")) {
             unsigned x, y, w, h;
-			scanf("%*s %"XSTR(MAP_NAME_LEN)"s %u %u %u %u", str, &x, &y, &w, &h);
+			CHECKED_SCANF(5, "%*s %"XSTR(MAP_NAME_LEN)"s %u %u %u %u", str, &x, &y, &w, &h);
 			m->texture_id = Tex_loadFromFile(str);
             assert(m->texture_id);
             // TODO set texture clip
-
-
             break;
         }
     }
@@ -45,20 +48,20 @@ void Map_loadFromFile(Map *m, FILE *file) {
         if(buf[0] == '#')
             continue;
             
-             if(STREQ(buf, "name")) scanf("%*s %"XSTR(MAP_NAME_LEN)"s", m->name);
-        else if(STREQ(buf, "size")) scanf("%*s %f %f", &(m->size.x), &(m->size.y));
+             if(STREQ(buf, "name")) CHECKED_SCANF(1, "%*s %"XSTR(MAP_NAME_LEN)"s", m->name);
+        else if(STREQ(buf, "size")) CHECKED_SCANF(2, "%*s %f %f", &(m->size.x), &(m->size.y));
         else if(STREQ(buf, "terrain")) {
 			unsigned x, y, w, h;
-			scanf("%*s %"XSTR(MAP_NAME_LEN)"s %u %u %u %u", str, &x, &y, &w, &h);
+			CHECKED_SCANF(5, "%*s %"XSTR(MAP_NAME_LEN)"s %u %u %u %u", str, &x, &y, &w, &h);
 			m->texture_terrain_id = Tex_loadFromFile(str);
             assert(m->texture_terrain_id);
             // TODO set texture clip
         }
-        else if(STREQ(buf, "color")) scanf("%*s %f %f %f", &(m->color.r), &(m->color.g), &(m->color.b));
-        else if(STREQ(buf, "friction")) scanf("%*s %f", &(m->friction));
-        else if(STREQ(buf, "checkpoint_color")) scanf("%*s %f %f %f", &(m->color_checkpoint.r),
+        else if(STREQ(buf, "color")) CHECKED_SCANF(3, "%*s %f %f %f", &(m->color.r), &(m->color.g), &(m->color.b));
+        else if(STREQ(buf, "friction")) CHECKED_SCANF(1, "%*s %f", &(m->friction));
+        else if(STREQ(buf, "checkpoint_color")) CHECKED_SCANF(3, "%*s %f %f %f", &(m->color_checkpoint.r),
                                                       &(m->color_checkpoint.g), &(m->color_checkpoint.b));
-        else if(STREQ(buf, "checkpoint_color_highlight")) scanf("%*s %f %f %f",
+        else if(STREQ(buf, "checkpoint_color_highlight")) CHECKED_SCANF(3, "%*s %f %f %f",
                                                                 &(m->color_checkpoint_highlight.r),
                                                                 &(m->color_checkpoint_highlight.g),
                                                                 &(m->color_checkpoint_highlight.b));
@@ -71,7 +74,7 @@ void Map_loadFromFile(Map *m, FILE *file) {
         else if(STREQ(buf, "checkpoint")) {
 			if(m->checkpoint_count >= MAX_CHECKPOINT_COUNT) break;
 
-			scanf("%*s %f %f %f", &(m->checkpoints[m->checkpoint_count].pos.x),
+			CHECKED_SCANF(3, "%*s %f %f %f", &(m->checkpoints[m->checkpoint_count].pos.x),
 								  &(m->checkpoints[m->checkpoint_count].pos.y),
 								  &(m->checkpoints[m->checkpoint_count].radius));
 
