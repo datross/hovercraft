@@ -29,6 +29,14 @@ typedef struct {
     } shape;
 } ConvexShape;
 
+/* Forme de collision, statique. */
+typedef struct {
+    Vec2 position;
+    float rotation;
+    ConvexShape shape;
+    char visited; /* Si la collision est déjà testée. */
+} Obstacle;
+
 /* Solides physiques */
 /* NOTE : les coordonnées dans un solide sont toutes dans le 
  * référentiel barycentrique. */
@@ -65,6 +73,19 @@ typedef struct Force {
 } Force;
 
 typedef struct {
+    Obstacle ** obstacles;
+    unsigned nb_obstacles;
+} Cell;
+
+typedef struct {
+    Cell ** grid;
+    unsigned w, h;
+} Grid;
+
+typedef struct {
+    Grid obstacles_grid;
+    Obstacle * obstacles; /* Tableau de tous les obstacles. */
+    unsigned nb_obstacles;
     Solid *solids; /* Tous les objets du monde */
     
     /* File des forces à appliquer */
