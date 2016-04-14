@@ -268,7 +268,9 @@ void Game_updateStartScreen(Game *g) {
 }
 void Game_update(Game *g) {
     g->update(g);
-    memcpy(g->input.players_old, g->input.players, 2*sizeof(PlayerInputState));
+    size_t i;
+    for(i=0 ; i<MAX_PLAYERS ; ++i)
+        g->input.players[i].old = g->input.players[i].now;
     /* L'ordre compte. S'assurer que g->update(g) soit d'abord. */
     switch(g->view_count) {
     case 1:

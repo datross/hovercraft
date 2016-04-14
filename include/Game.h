@@ -11,6 +11,11 @@
 #include <Physics.h>
 #include <Sprite.h>
 
+#define MAX_SHIPS 4
+#define MAX_PALETTES 6
+#define MAX_MAPS 32
+#define MAX_PLAYERS 2
+
 typedef struct {
     unsigned accelerating  : 1;
     unsigned left_tilting  : 1;
@@ -21,8 +26,13 @@ typedef struct {
 } PlayerInputState;
 
 typedef struct {
-    PlayerInputState players[2];
-    PlayerInputState players_old[2];
+    PlayerInputState now, old;
+} PlayerInput;
+
+#define PlayerInput_pressed(ipt, cmd) (ipt.now.cmd < ipt.old.cmd)
+
+typedef struct {
+    PlayerInput players[MAX_PLAYERS];
     Vec2u old_mouse_pos;
     unsigned mouse_down : 1;
     unsigned reserved   : 7;
@@ -34,9 +44,6 @@ typedef struct {
     unsigned reserved : 7;
 } MainMenu;
 
-#define MAX_SHIPS 4
-#define MAX_PALETTES 6
-
 typedef struct {
     Sprite bg;
     Sprite ship_artworks[MAX_SHIPS][MAX_PALETTES];
@@ -45,8 +52,6 @@ typedef struct {
     unsigned selected_ship_index : 3;
     unsigned reserved : 4;
 } ShipMenu;
-
-#define MAX_MAPS 32
 
 typedef struct {
     Sprite bg;
@@ -67,7 +72,16 @@ typedef struct {
 typedef struct {
     uint32_t step_ms;
      int32_t time_ms;
-} RaceState;
+    Map map;
+    Ship ships[MAX_PLAYERS];
+    View views[MAX_PLAYERS]; /* Nombre magique + taille fixe, mais pour le coup 
+                      un malloc() est trop chiant. 
+                      On va voir avec le temps. */
+    PhysicWorld world;
+    unsigned ship_count : 2;
+    unsigned view_count : 2; /* Idem, taille fixe. */
+    unsigned reserved   : 4;
+} Race;
 
 typedef struct Game Game; /* Déclaration pour le pointeur de fonction */
 struct Game {
@@ -86,24 +100,17 @@ struct Game {
                                 changement. */
     InputState input;  /* privé. Altéré par Game_handleEvent(). */
     void (*update)(Game*);   /* privé. Appeler Game_update() à la place. */
-    Map map;
-    Ship ships[2];
-    PhysicWorld world;
-    View views[2]; /* Nombre magique + taille fixe, mais pour le coup 
-                      un malloc() est trop chiant. 
-                      On va voir avec le temps. */
-    unsigned view_count : 2; /* Idem, taille fixe. */
-    unsigned ship_count : 2;
     unsigned quit       : 1;
     unsigned fullscreen : 1;
-    unsigned reserved   : 2; /* Padding pour que le bitfield fasse un octet. */
+    unsigned reserved   : 6; /* Padding pour que le bitfield fasse un octet. */
+    View menu_view;
     Vec2 world_mouse_cursor;
     MainMenu main_menu;
     ShipMenu ship_menu;
     MapMenu map_menu;
     ClapTransition clap_transition;
     FadeTransition fade_transition;
-    RaceState race_state;
+    Race race;
 };
 
 /* Game_init() seul ne suffit pas à afficher le jeu. 
@@ -119,6 +126,7 @@ void Game_update(Game *g);
 /* Affichage du jeu. 
  * Que des draw calls : pas de glClear() ni de SwapBuffers(). */
 void Game_render(const Game *g);
+
 
 /* Cette fonction est privée. Elle sert juste de passerelle entre 
  * Game.c et Game_logic.c */
