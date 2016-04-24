@@ -209,7 +209,12 @@ void Game_renderRace(const Game *g) {
         Game_renderRaceView(g, i);
 
     View_apply(&g->menu_view);
-    char str[16];
+    char str[64];
+    if(g->race.time_of_completion) {
+        snprintf(str, sizeof(str), "Player %u won!", g->race.rankings[0]+1);
+        Monospace_renderCenteredString(str, .1f);
+        return;
+    }
     if(g->race.time_ms >= 0) {
         snprintf(str, sizeof(str), "%02u:%02u:%03u", 
                 (g->race.time_ms/1000)/60, 

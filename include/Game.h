@@ -73,6 +73,9 @@ typedef struct {
     unsigned ship_count : 2;
     unsigned view_count : 2;
     unsigned reserved   : 4;
+    uint32_t completion_times[MAX_PLAYERS];
+    uint32_t time_of_completion;
+    uint32_t rankings[MAX_PLAYERS];
 } Race;
 
 typedef struct Game Game; /* Déclaration pour le pointeur de fonction */

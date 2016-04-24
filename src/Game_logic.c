@@ -69,6 +69,12 @@ static void ClapTransition_start(ClapTransition *ct, float top) {
 }
 
 static void Game_updateMainMenu(Game *g);
+static void Game_updateMapMenu(Game *g);
+
+static void Game_updateRaceToMapMenu(Game *g) {
+    if(g->clap_transition.update == ClapTransition_updateDummy)
+        g->update = Game_updateMapMenu;
+}
 
 static void Game_updatePostRace(Game *g) { 
     size_t i;
@@ -76,7 +82,8 @@ static void Game_updatePostRace(Game *g) {
         Ship *s = g->race.ships+i;
         Ship_deinitPhysics(s);
     }
-    g->update = Game_updateStartScreen;
+    g->render = Game_renderMapMenuWithClap;
+    g->update = Game_updateRaceToMapMenu;
 }
 
 static inline void reactToZoom(Game *g, size_t i) {
@@ -91,6 +98,16 @@ static void Game_updateRace(Game *g) {
     uint32_t new_ms = SDL_GetTicks();
     g->race.time_ms += new_ms - g->race.step_ms;
     g->race.step_ms = new_ms;
+
+    if(g->race.time_of_completion) {
+        if(g->clap_transition.update == ClapTransition_updateStayClosed) {
+            g->update = Game_updatePostRace;
+        } else if(new_ms-g->race.time_of_completion > 2400 
+               && g->clap_transition.update != ClapTransition_updateClose) {
+            ClapTransition_start(&g->clap_transition, View_getOrthoTop(&g->menu_view));
+            g->render = Game_renderRaceWithClap;
+        }
+    }
 
     size_t i;
     for(i=0 ; i<g->race.ship_count ; ++i) {
@@ -147,16 +164,20 @@ static void Game_updateRace(Game *g) {
         const float c_dist = sqrtf(diff.x*diff.x + diff.y*diff.y);
         if(c_dist <= c->radius)
             ++(s->next_checkpoint_index);
-        if(s->next_checkpoint_index >= g->race.map.data->checkpoint_count) {
-            printf("It's over ! Player %u won.\n", (unsigned) i+1);
-            printf("elapsed time : %d ms\n", g->race.time_ms);
-            g->update = Game_updatePostRace;
-        } else s->guides[0].pos = c->pos;
 
         const size_t j = (i+1)%(g->race.ship_count);
         s->guides[1].pos.x = g->race.ships[j].physic_solid.position.x;
         s->guides[1].pos.y = g->race.ships[j].physic_solid.position.y;
         Ship_refreshGuides(s);
+
+        if(s->next_checkpoint_index >= g->race.map.data->checkpoint_count) {
+            if(!g->race.time_of_completion) {
+                g->race.time_of_completion = SDL_GetTicks();
+                g->race.rankings[0] = i;
+                g->race.rankings[1] = j;
+                g->race.completion_times[i] = g->race.time_ms;
+            }
+        } else s->guides[0].pos = c->pos;
 
         /*
         printf("pos:(%f, %f); tilt: %f deg; speed: %u units/s\n", 
@@ -225,8 +246,11 @@ static void Game_updatePreCountdown(Game *g) {
     g->race.world.forces_head  = NULL;
     g->race.world.forces_tail  = NULL;
     g->race.map.data = g->map_data + g->map_menu.selected_map_index;
+    g->race.time_of_completion = 0;
     size_t i;
     for(i=0 ; i<g->race.ship_count ; ++i) {
+        g->race.rankings[i] = 0;
+        g->race.completion_times[i] = 0;
         Ship_initPhysics(g->race.ships + i);
         World_addSolid(&(g->race.world), &(g->race.ships[i].physic_solid)); 
         g->race.ships[i].physic_solid.position.x = g->race.map.data->start[i].pos.x;
