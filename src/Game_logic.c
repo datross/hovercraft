@@ -78,6 +78,7 @@ static void Game_updateRaceToMapMenu(Game *g) {
 
 static void Game_updatePostRace(Game *g) { 
     size_t i;
+    /* FIXME penser à cleanup le Physics World ? */
     for(i=0 ; i<g->race.ship_count ; ++i) {
         Ship *s = g->race.ships+i;
         Ship_deinitPhysics(s);
