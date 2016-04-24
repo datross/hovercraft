@@ -10,7 +10,6 @@ prompt
 binary
 put menus/menus.txt
 put menus/menus.png
-put music/otherworld.flac
 put ships/dolphin_unicorn.txt
 put ships/dolphin_unicorn.png
 put ships/dolphin_unicorn.pal.png

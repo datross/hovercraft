@@ -10,7 +10,6 @@ prompt
 binary
 newer menus/menus.txt
 newer menus/menus.png
-newer music/otherworld.flac
 newer ships/dolphin_unicorn.txt
 newer ships/dolphin_unicorn.png
 newer ships/dolphin_unicorn.pal.png
