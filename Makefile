@@ -1,9 +1,9 @@
 
 CC = gcc
+# On met std=c99 pour s'assurer de l'existence du format %n dans sscanf().
 # -Wall active -Wswitch, qui râle dès qu'on ne traite pas tous les cas
-# possibles dans des switch().
-# Inacceptable pour des switchs de touches du clavier.
-CFLAGS = -Wall -Wno-switch -O3
+# possibles dans des switch() - Inacceptable pour des switchs de touches du clavier.
+CFLAGS = -g -std=c99 -Wall -Wno-switch -O3 -D_GNU_SOURCE
 LDFLAGS = -lm -lGL -lGLU -lSDL -lSDL_image
 
 APP_BIN = hovercraft

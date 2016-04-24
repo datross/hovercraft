@@ -10,11 +10,7 @@
 #include <Ship.h>
 #include <Physics.h>
 #include <Sprite.h>
-
-#define MAX_SHIPS 4
-#define MAX_PALETTES 6
-#define MAX_MAPS 32
-#define MAX_PLAYERS 2
+#include <GameLimits.h>
 
 typedef struct {
     unsigned accelerating  : 1;
@@ -22,14 +18,15 @@ typedef struct {
     unsigned right_tilting : 1;
     unsigned zooming_in    : 1;
     unsigned zooming_out   : 1;
-    unsigned reserved      : 3;
+    unsigned escaping      : 1;
+    unsigned reserved      : 2;
 } PlayerInputState;
 
 typedef struct {
     PlayerInputState now, old;
 } PlayerInput;
 
-#define PlayerInput_pressed(ipt, cmd) (ipt.now.cmd < ipt.old.cmd)
+#define PLAYERINPUT_PRESSED(ipt, cmd) (ipt.now.cmd > ipt.old.cmd)
 
 typedef struct {
     PlayerInput players[MAX_PLAYERS];
@@ -39,51 +36,53 @@ typedef struct {
 } InputState;
 
 typedef struct {
-    Sprite bg, title, p1, p2;
+    Sprite sky, bg[4], title, oneplayer, twoplayers;
     unsigned choice : 1;
     unsigned reserved : 7;
 } MainMenu;
 
 typedef struct {
-    Sprite bg;
-    Sprite ship_artworks[MAX_SHIPS][MAX_PALETTES];
-    Sprite ship_icons[MAX_SHIPS][MAX_PALETTES];
+    Sprite titles[MAX_PLAYERS], ship_cell;
+    size_t selected_ship_index[MAX_PLAYERS];
+    size_t selected_pal_index[MAX_PLAYERS];
     unsigned player_index : 1;
-    unsigned selected_ship_index : 3;
-    unsigned reserved : 4;
+    unsigned reserved : 7;
 } ShipMenu;
 
 typedef struct {
-    Sprite bg;
-    Sprite map_artworks[MAX_MAPS];
-    Sprite map_names[MAX_MAPS];
-    size_t map_count, selected_map_index;
+    Sprite left_arrow;
+    size_t selected_map_index;
 } MapMenu;
 
-typedef struct {
+typedef struct ClapTransition ClapTransition;
+struct ClapTransition {
     Sprite top, bottom;
     Vec2 top_pos, bottom_pos;
-} ClapTransition;
-
-typedef struct {
-    float opacity;
-} FadeTransition;
+    uint32_t time_of_closing;
+    void (*update)(ClapTransition *ct, float top);
+};
 
 typedef struct {
     uint32_t step_ms;
      int32_t time_ms;
-    Map map;
+    unsigned countdown_prev_seconds_left;
+    Map  map;
     Ship ships[MAX_PLAYERS];
-    View views[MAX_PLAYERS]; /* Nombre magique + taille fixe, mais pour le coup 
-                      un malloc() est trop chiant. 
-                      On va voir avec le temps. */
+    View views[MAX_PLAYERS];
     PhysicWorld world;
     unsigned ship_count : 2;
-    unsigned view_count : 2; /* Idem, taille fixe. */
+    unsigned view_count : 2;
     unsigned reserved   : 4;
 } Race;
 
 typedef struct Game Game; /* Déclaration pour le pointeur de fonction */
+#define FADE_TRANSITION_INC .08f
+typedef struct {
+    float alpha, alpha_vel;
+    void (*next_render_func)(const Game*);
+    void (*update)(Game*); /* Mettre à jour la transition. */
+} FadeTransition;
+
 struct Game {
     uint32_t tickrate;       /* public. Spécifie le taux de rafraichissement
                                 de la logique du jeu en millisecondes
@@ -100,17 +99,22 @@ struct Game {
                                 changement. */
     InputState input;  /* privé. Altéré par Game_handleEvent(). */
     void (*update)(Game*);   /* privé. Appeler Game_update() à la place. */
-    unsigned quit       : 1;
-    unsigned fullscreen : 1;
-    unsigned reserved   : 6; /* Padding pour que le bitfield fasse un octet. */
+    void (*render)(const Game*);   /* privé. Appeler Game_render() à la place. */
+    unsigned quit         : 1;
+    unsigned fullscreen   : 1;
+    unsigned player_count : 2;
+    unsigned reserved     : 4; /* Padding pour que le bitfield fasse un octet. */
     View menu_view;
     Vec2 world_mouse_cursor;
     MainMenu main_menu;
     ShipMenu ship_menu;
     MapMenu map_menu;
-    ClapTransition clap_transition;
     FadeTransition fade_transition;
+    ClapTransition clap_transition;
     Race race;
+    ShipData ship_data[MAX_SHIPS];
+    MapData map_data[MAX_MAPS];
+    size_t map_data_count;
 };
 
 /* Game_init() seul ne suffit pas à afficher le jeu. 
@@ -131,5 +135,27 @@ void Game_render(const Game *g);
 /* Cette fonction est privée. Elle sert juste de passerelle entre 
  * Game.c et Game_logic.c */
 void Game_updateStartScreen(Game *g);
+/* Celle-là pour Game_graphics.c */
+void Game_updatePaletteSelection(Game *g);
+
+void ClapTransition_updateDummy(ClapTransition *ct, float top);
+void FadeTransition_updateDummy(Game *g);
+
+/* Ces fonctions sont privées. Elles sont utilisées en tant que pointeurs
+ * par Game_logic.c */
+void Game_renderMainMenu(const Game *g);
+void Game_renderShipMenu(const Game *g);
+void Game_renderMapMenu(const Game *g);
+void Game_renderMapMenuWithClap(const Game *g);
+void Game_renderRace(const Game *g);
+void Game_renderRaceWithClap(const Game *g);
+void Game_renderStartScreen(const Game *g);
+
+/* Encore des fonctions privées. */
+void Game_loadMenus(Game *g, const char *dirname);
+void Game_loadShips(Game *g, const char *dirname);
+void Game_loadMaps(Game *g, const char *dirname);
+
+void Game_resizeViewports(Game *g);
 
 #endif /* GAME_H */

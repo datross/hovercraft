@@ -4,6 +4,9 @@
 #include <Utils.h>
 #include <View.h>
 
+float View_getOrthoTop(const View *v) {
+    return v->ortho_right*v->viewport_size.y/(float)v->viewport_size.x;
+}
 
 static inline void View_applyProj(const View *v) {
     glMatrixMode(GL_PROJECTION);
@@ -17,11 +20,14 @@ static inline void View_applyProj(const View *v) {
 static inline void View_applyModelView(const View *v) {
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
-    glScalef(v->zoom, v->zoom, 1);
+    glScalef(v->zoom, v->zoom, 1.f);
+    glScalef(v->sym.x, v->sym.y, 1.f);
     glRotatef(degf(-v->tilt+M_PI/2.f), 0,0,1);
     glTranslatef(-v->center.x, -v->center.y, 0);
 }
 void View_apply(const View *v) {
+    glViewport(v->viewport_pos.x, v->viewport_pos.y,
+               v->viewport_size.x, v->viewport_size.y);
     View_applyProj(v);
     View_applyModelView(v);
 }
@@ -32,6 +38,7 @@ static inline void View_applyTweakedModelView(const View *v) {
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
     glScalef(v->zoom, v->zoom, 1);
+    glScalef(v->sym.x, v->sym.y, 1.f);
     glRotatef(degf(v->tilt-M_PI/2.f), 0,0,1);
     glTranslatef(-v->center.x, v->center.y, 0);
 }

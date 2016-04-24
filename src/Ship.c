@@ -1,15 +1,15 @@
 #include <stdio.h>
+#include <stdlib.h>
 #include <GL/gl.h>
 #include <Ship.h>
 #include <Utils.h>
 
-void Ship_init(Ship *s) {
-    memset(s, 0, sizeof(Ship));
-    s->accel_multiplier = 0.0005f;
-    s->tilt_step = 0.0003f;
-    s->friction = 0.001f;
-    s->max_speed = 200.f;
-    
+void Ship_initPhysics(Ship *s) {
+    /* Dès ici, c'est safe de se référer au ShipData pour choisir la shape
+     * de collision. Surtout ce champs :
+     *     s->data.above[0][0].half_size
+     * Qui donne la moitié de la taille du quad texturé en coordonnées monde.
+     */ 
     /* Temporaire */
     Polygon polygon;
     polygon.nb_vertices = 4;
@@ -36,13 +36,9 @@ void Ship_init(Ship *s) {
 	s->main_translation_friction.position = MakeVec2(0,0);
 	s->main_rotation_friction.type = COUPLE;
 	s->main_rotation_friction.solid = &(s->physic_solid);
-	
-    
-    s->r = 1.f;
 }
 
-void Ship_deinit(Ship *s) {
-    /* Temporaire */
+void Ship_deinitPhysics(Ship *s) {
     free(s->physic_solid.collision_shapes[0].shape.polygon.vertices);
 }
 
@@ -64,7 +60,7 @@ void Ship_renderGuides(const Ship *s) {
 }
 
 void Ship_renderBoundingVolumes(const Ship *s) {
-    glColor3f(s->r,s->g,s->b);
+    glColor3f(1.f, 0.f, 0.f);
     glPushMatrix();
     {
         glTranslatef(s->physic_solid.position.x, s->physic_solid.position.y, 0);
@@ -82,5 +78,25 @@ void Ship_renderBoundingVolumes(const Ship *s) {
     glPopMatrix();
 }
 void Ship_render(const Ship *s) {
-    Ship_renderBoundingVolumes(s);
+    /* Ship_renderBoundingVolumes(s); */
+    glPushMatrix();
+    {
+        glTranslatef(s->physic_solid.position.x, s->physic_solid.position.y, 0);
+        glRotatef((s->physic_solid.rotation - M_PI / 2.)*180.f/M_PI,0,0,1);
+        Sprite_render(&s->data->above[s->above_index][s->palette_index]);
+    }
+    glPopMatrix();
+}
+void Ship_refreshGuides(Ship *s) {
+    size_t i;
+    for(i=0 ; i<s->guide_count ; ++i) {
+        Vec2 diff = {s->guides[i].pos.x - s->physic_solid.position.x, 
+                     s->guides[i].pos.y - s->physic_solid.position.y};
+        s->guides[i].theta = degf(atan2f(diff.y, diff.x))-90.f;
+        s->guides[i].distance = sqrtf(diff.x*diff.x + diff.y*diff.y);
+        /*
+        printf("Distance from guides[%zu] : %u units.\n", 
+                i, (uint32_t)s->guides[i].distance);
+        */
+    }
 }

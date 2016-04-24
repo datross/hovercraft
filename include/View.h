@@ -19,9 +19,17 @@ typedef struct {
                          Pour les menus on le voudra à 1. In-game, on le
                          choisit avant la course par rapport à la taille des 
                          véhicules (Typiquement 8). */
+    Vec2 sym; /* C'est nul, mais pour le menu, il faut faire une symétrie horizontale et verticale pour que ça s'affiche dans le bon sens. 
+                  Ca m'ébouriffe complètement. */
 } View;
 
 void View_apply(const View *v);
+/* Obtenir la coordonnée 'top' de la projection orthographique.
+ * Ca correspond au haut du viewport en coordonnées monde. 
+ * Elle est calculée en fonction de l'aspect ration et du champ 'ortho_right'. 
+ * Le coordonnée 'bottom' est égale à son opposée. Ca devient
+ * dès lors facile de calculer la hauteur du viewport en coordonnées monde (et faire des menus responsive ! :p ). */
+float View_getOrthoTop(const View *v);
 void View_mapPixelToCoords(const View *v, Vec2 *coords, const Vec2u *pixel);
 /* Fonction non-implémentée. */
 /* void View_mapCoordsToPixel(const View *v, Vec2u *pixel, const Vec2 *coords); */

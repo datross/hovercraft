@@ -3,37 +3,41 @@
 
 #include <Vec.h>
 #include <Utils.h>
+#include <GameLimits.h>
 #include <GL/glu.h>
 #include <GL/gl.h>
+#include <Sprite.h>
+
+typedef struct {
+    Vec2 pos;
+    float tilt;
+} MapStart;
 
 typedef struct {
     Vec2 pos;
     float radius;
 } Checkpoint;
 
-#define MAX_CHECKPOINT_COUNT 32
-
+#define MAX_CHECKPOINTS 32
 #define MAP_NAME_LEN 128
-typedef struct {
-    char name[MAP_NAME_LEN];
-    GLuint texture_id;
-} MapPreview;
 
 typedef struct {
     char name[MAP_NAME_LEN];
     Vec2 size; /* Bords, en coordonnées monde. */
-    GLuint texture_terrain_id;
+    Sprite artwork, banner;
+    TiledQuad terrain;
+    Color3 color, checkpoint_color, checkpoint_highlight;
     float friction;
-    Checkpoint checkpoints[MAX_CHECKPOINT_COUNT]; 
-    Color3 color, color_checkpoint, color_checkpoint_highlight;
+    MapStart start[MAX_PLAYERS];
+    Checkpoint checkpoints[MAX_CHECKPOINTS]; 
     size_t checkpoint_count;
-    Vec2 start_player[2];
-    /* TODO checkpoints, obstacles, etc. */
+} MapData;
+
+typedef struct {
+    const MapData *data;
 } Map;
 
 void Map_render(const Map *m);
 void Map_renderCheckpoints(const Map *m, size_t next_checkpoint_index);
-void Map_loadFromFile(Map *m, FILE *file);
-void MapPreview_loadFromFile(MapPreview *m, FILE *file);
 
 #endif /* MAP_H */

@@ -24,11 +24,11 @@ int main(int argc, char* argv[]) {
 
     Game game;
     Game_init(&game);
-    Game_reshape(&game);
     game.tickrate = FRAMERATE_MILLISECONDS;
 
     SDL_WM_SetCaption("Hovercraft", NULL);
     
+    glClearColor(0.f, 1.f, 0.f, 1.f);
     for(game.quit=false ; !game.quit ; ) {
         Uint32 startTime = SDL_GetTicks();
                 
