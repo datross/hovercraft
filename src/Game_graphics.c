@@ -340,7 +340,7 @@ void Game_renderShipMenu(const Game *g) {
         glPushMatrix();
         glTranslatef(ship_cell_pos[i].x, ship_cell_pos[i].y, 0.f);
         Sprite_render(&g->ship_menu.ship_cell);
-        Sprite_render(&g->ship_data[g->ship_menu.selected_ship_index[g->ship_menu.player_index]].icon[0]);
+        Sprite_render(&g->ship_data[i].icon[0]);
         glPopMatrix();
     }
     for(i=0 ; i<MAX_PALETTES ; ++i) {
