@@ -58,8 +58,10 @@ void Game_deinit(Game *g) {
     glDeleteTextures(1, &g->main_menu.sky.tex_id);
     size_t i, p;
     for(i=0 ; i<MAX_SHIPS ; ++i)
-        for(p=0 ; p<MAX_PALETTES ; ++p)
+        for(p=0 ; p<MAX_PALETTES ; ++p) {
             glDeleteTextures(1, &g->ship_data[i].icon[p].tex_id);
+            glDeleteTextures(1, &g->ship_data[i].artwork[p].tex_id);
+        }
     for(i=0 ; i<g->map_data_count ; ++i) {
         glDeleteTextures(1, &g->map_data[i].terrain.tex_id);
         glDeleteTextures(1, &g->map_data[i].artwork.tex_id);
