@@ -107,6 +107,8 @@ void Parser_deinit(Parser *p) {
         else if(STREQ(read_key, key)) { \
             PARSER_SSCANF(1, parser, "%" XSTR(PARSER_MAX_FILE_NAME_SIZE) "s", \
                           read_filename); \
+            if((parser)->teximg) \
+                SDL_FreeSurface((parser)->teximg); \
             (parser)->teximg = IMG_Load(read_filename); \
             if(!(parser)->teximg) { \
                 fprintf(stderr, "Impossible de charger l'image '%s'\n", read_filename); \
@@ -132,6 +134,8 @@ void Parser_deinit(Parser *p) {
         else if(STREQ(read_key, key)) { \
             PARSER_SSCANF(1, parser, "%" XSTR(PARSER_MAX_FILE_NAME_SIZE) "s", \
                           read_filename); \
+            if((parser)->palimg) \
+                SDL_FreeSurface((parser)->palimg); \
             (parser)->palimg = IMG_Load(read_filename); \
             if(!(parser)->palimg) { \
                 fprintf(stderr, "Impossible de charger l'image '%s'\n", read_filename); \
