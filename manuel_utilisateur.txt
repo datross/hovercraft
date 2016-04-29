@@ -1,0 +1,27 @@
+/--------------------\
+|                    |
+|--o--HOVERCRAFT--o--|
+|                    |
+\--------------------/
+
+Hovercraft est un jeu de course et d'adresse qui vous place aux commandes d'un
+aéroglisseur.
+Gérez votre accélération et vos virages afin de passer chaque point de passage
+dans l'ordre en un temps record, mais attention !
+Votre véhicule a beaucoup d'inertie.
+
+I.   Commandes
+II.  Lors de la course
+III. Personnalisation
+
+
+I. Commandes
+
+  Joueur 1    | Joueur 2 |  Menus  |          Course          
+--------------+----------+---------+--------------------------
+Echap         | Echap   Retour  |  
+Espace        | Shift gauche Valider | Réacteur arrière
+Flèche gauche | Q     Gauche  | Réacteur pivotal gauche
+Flèche droite | D     Droite  | Réacteur pivotal droit
+Flèche haut   | Z     Haut    | Zoom caméra
+Flèche bas    | S     Bas     | Dézoom caméra
