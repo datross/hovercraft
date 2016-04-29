@@ -17,11 +17,29 @@ III. Personnalisation
 
 I. Commandes
 
-  Joueur 1    | Joueur 2 |  Menus  |          Course          
---------------+----------+---------+--------------------------
-Echap         | Echap   Retour  |  
-Espace        | Shift gauche Valider | Réacteur arrière
-Flèche gauche | Q     Gauche  | Réacteur pivotal gauche
-Flèche droite | D     Droite  | Réacteur pivotal droit
-Flèche haut   | Z     Haut    | Zoom caméra
-Flèche bas    | S     Bas     | Dézoom caméra
+   Joueur 1   |   Joueur 2   |  Menus  |         Course          
+--------------+--------------+---------+--------------------------
+Echap         | Echap        | Retour  |  
+Espace        | Shift gauche | Valider | Réacteur arrière
+Flèche gauche | Q            | Gauche  | Réacteur pivotal gauche
+Flèche droite | D            | Droite  | Réacteur pivotal droit
+Flèche haut   | Z            | Haut    | Zoom caméra
+Flèche bas    | S            | Bas     | Dézoom caméra
+
+Le joueur 1 contrôle les menus, sauf à l'écran de sélection de
+l'aéroglisseur du joueur 2.
+
+II. Lors de la course
+
+N'hésitez pas à maintenir la touche d'accélération en avance : la technologie 
+moderne fait des miracles.
+Une flèche noire proche de votre bateau vous indique constamment la direction
+vers le prochain point de passage que vous devez valider. Alors qu'elle est 
+d'une grande aide pour finir les pistes, vous gagnerez à tout de même à 
+dézoomer pour mieux calibrer votre trajectoire.
+
+En mode 2 joueurs, une autre flèche indique à chaque joueur la direction vers
+son rival.
+
+III. Personnalisation
+
