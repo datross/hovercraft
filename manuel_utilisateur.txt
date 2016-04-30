@@ -43,3 +43,49 @@ son rival.
 
 III. Personnalisation
 
+Vous pouvez à peu près personnaliser tous les aspects du jeu en modifiant le
+contenu du dossier res/.
+Au lancement du jeu :
+- Le fichier res/menus/menus.txt est lu;
+- Le dossier res/ships/ est scanné, et _exactement_ 4 fichiers .txt, décrivant 
+chacun un aéroglisseur, sont lus;
+- Le dossier res/maps/ est scanné, et jusqu'à 32 fichier .txt, décrivant
+chacun un parcours, sont lus.
+
+Le meilleur moyen de créer ses propres aéroglisseurs et parcours est de copier
+des fichiers pré-existants pour s'en servir comme base.
+Voici un guide simple pour créer votre aéroglisseur (nommé ici "Foo") :
+- Copiez res/ships/dolphin_unicorn.txt vers res/ships/foo.txt; 
+- Créez vos propres images .png en vous inspirant de 
+  res/ships/dolphin_unicorn*.png;
+  Contraintes : 
+  - Essayez de faire en sorte que leur dimensions soient une puissance de 2
+    (ce n'est pas requis pour les fichiers "palettes" - voir plus bas);
+  - Vous pouvez réarranger les sprites au sein de l'image à votre guise, tant
+    que les sprites requis sont tous présents et que vous prenez garde à
+    modifier votre res/ships/foo.txt en fonction (voir plus bas).
+- Créez vos palettes avec une image .png, similaire à 
+  res/ships/dolphin_unicorn_pal.png;
+  Chaque _ligne_ de cette image décrit une palette, qui décrit simplement un
+  remplacement de couleurs. La première ligne est spéciale, et devrait contenir
+  toutes les couleurs utilisées initialement par votre bateau - les lignes qui
+  la suivent s'en servent comme référence.
+  Votre image de palettes DOIT être haute de 6 pixels ou plus;
+  Elle DEVRAIT être large de 32 pixels ou moins.
+- Modifiez votre fichier res/ships/foo.txt :
+  - Remplacez les noms de fichiers .png par les vôtres;
+  - Les lignes du type suivant (où <n> est entier positif) :
+    <nom_de_sprite> <n> <n> <n> <n>
+    décrivent un rectangle qui est la portion d'image utilisée par le sprite
+    concerné. Par exemple, une ligne hypothétique du type :
+    icon 20 42 200 300
+    signifie que l'icône de l'aéroglisseur est à trouver dans le rectangle dont
+    le coin supérieur gauche est horizontalement à 20 pixels du coin supérieur
+    gauche de l'image (et 42 pixels verticalement), de largeur 200 et hauteur
+    300.
+    Assurez vous donc de modifier les lignes de ce type si vous créez vos propres
+    images.
+- Expérimentez avec les autres valeurs (prenez garde aux excès);
+- Renommez le fichier .txt d'un autre aéroglisseur en .tx (ou autre chose) afin
+  qu'il soit ignoré lors du chargement du jeu et ainsi libère une place pour le
+  vôtre.
