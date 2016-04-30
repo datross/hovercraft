@@ -49,17 +49,18 @@ Au lancement du jeu :
 - Le fichier res/menus/menus.txt est lu;
 - Le dossier res/ships/ est scanné, et _exactement_ 4 fichiers .txt, décrivant 
 chacun un aéroglisseur, sont lus;
-- Le dossier res/maps/ est scanné, et jusqu'à 32 fichier .txt, décrivant
+- Le dossier res/maps/ est scanné, et jusqu'à 32 fichiers .txt, décrivant
 chacun un parcours, sont lus.
 
 Le meilleur moyen de créer ses propres aéroglisseurs et parcours est de copier
 des fichiers pré-existants pour s'en servir comme base.
 Voici un guide simple pour créer votre aéroglisseur (nommé ici "Foo") :
 - Copiez res/ships/dolphin_unicorn.txt vers res/ships/foo.txt; 
-- Créez vos propres images .png en vous inspirant de 
-  res/ships/dolphin_unicorn*.png;
+- Créez vos propres images .png en gardant res/ships/dolphin_unicorn*.png
+  comme référence pour les sprites à fournir;
   Contraintes : 
-  - Essayez de faire en sorte que leur dimensions soient une puissance de 2
+  - La largeur et hauteur de vos images devraient être égales en plus d'être 
+    une puissance de 2;
     (ce n'est pas requis pour les fichiers "palettes" - voir plus bas);
   - Vous pouvez réarranger les sprites au sein de l'image à votre guise, tant
     que les sprites requis sont tous présents et que vous prenez garde à
