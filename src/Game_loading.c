@@ -203,13 +203,77 @@ void Parser_deinit(Parser *p) {
                 ++((mapdata)->checkpoint_count); \
             } else fprintf(stderr, "Un checkpoint a été ignoré. La limite est %u.\n", MAX_CHECKPOINTS); \
         }
+#define PARSER_EXPECT_WALL(parser, key, mapdata) \
+        else if(STREQ(read_key, key)) { \
+            if(!current_wall) { \
+                fprintf(stderr, "Erreur parsing murs : pas d'obstacle déclaré avant l'instanciation.\n"); \
+                exit(EXIT_FAILURE); \
+            } \
+            Wall * buf = realloc(mapdata->walls, (++mapdata->wall_count) * sizeof(Wall)); \
+            if(!buf) { \
+                fprintf(stderr, "Erreur d'allocation mémoire des obstacles.\n"); \
+                exit(EXIT_FAILURE); \
+            } else { \
+                mapdata->walls = buf; \
+                Wall * w = &(mapdata->walls[mapdata->wall_count - 1]); \
+                *w = *current_wall; \
+                if(w->physic_obstacle.shape.type == POLYGON) { \
+                    if(!(w->physic_obstacle.shape.shape.polygon.vertices = \
+                            malloc(w->physic_obstacle.shape.shape.polygon.nb_vertices * sizeof(Vec2)))) { \
+                        fprintf(stderr, "Erreur allocation mémoire pour les obstacles.\n"); \
+                        exit(EXIT_FAILURE); \
+                    } \
+                    memcpy(w->physic_obstacle.shape.shape.polygon.vertices, \
+                           current_wall->physic_obstacle.shape.shape.polygon.vertices, \
+                           w->physic_obstacle.shape.shape.polygon.nb_vertices * sizeof(Vec2)); \
+                } \
+                PARSER_SSCANF(6, parser, "%f %f %f %f %f %f",  \
+                    &(w->color.r), &(w->color.g), &(w->color.b), \
+                    &(w->physic_obstacle.position.x), &(w->physic_obstacle.position.y), \
+                    &(w->physic_obstacle.rotation)); \
+            } \
+        }
+#define PARSER_EXPECT_OBSTACLE(parser, key) \
+        else if(STREQ(read_key, key)) { \
+            if(current_wall) ConvexShape_free_content(&(current_wall->physic_obstacle.shape)); \
+            free(current_wall); \
+            if(!(current_wall = malloc(sizeof(Wall)))) { \
+                fprintf(stderr, "Erreur allocation structure tampon pour chargement des obstacles.\n"); \
+                exit(EXIT_FAILURE); \
+            } \
+            current_wall->physic_obstacle.visited = 0; \
+            char type[10]; \
+            PARSER_SSCANF(1, parser, "%10s", type); \
+            if(!strcmp(type, "polygon")) { \
+                current_wall->physic_obstacle.shape.type = POLYGON; \
+                unsigned nb_sommets = 0; \
+                PARSER_SSCANF(1, parser, "%u", &nb_sommets); \
+                current_wall->physic_obstacle.shape.shape.polygon.nb_vertices = nb_sommets; \
+                if(!(current_wall->physic_obstacle.shape.shape.polygon.vertices = malloc(nb_sommets * sizeof(Vec2)))) { \
+                    fprintf(stderr, "Erreur allocation mémoire pour les sommets des obstacles.\n"); \
+                    exit(EXIT_FAILURE); \
+                } \
+                for(unsigned i = 0; i < nb_sommets; ++i) { \
+                    PARSER_SSCANF(2, parser, "%f %f",  \
+                                &(current_wall->physic_obstacle.shape.shape.polygon.vertices[i].x), \
+                                &(current_wall->physic_obstacle.shape.shape.polygon.vertices[i].y)); \
+                } \
+            } else if(!strcmp(type, "circle")) { \
+                current_wall->physic_obstacle.shape.type = CIRCLE; \
+                PARSER_SSCANF(1, parser, "%f", &(current_wall->physic_obstacle.shape.shape.circle.radius)); \
+                current_wall->physic_obstacle.shape.shape.circle.position = MakeVec2(0,0); \
+            } else { \
+                fprintf(stderr, "Erreur de type d'obstacle.\n"); \
+                exit(EXIT_FAILURE); \
+            } \
+        }
 
 
 void Game_loadMenus(Game *g, const char *dirname) {
     Util_pushd(dirname);
     Parser the_parser;
     if(!Parser_init(&the_parser, "menus.txt"))
-        exit(EXIT_FAILURE); /* Le message d'erreur a été affiché. */
+        exit(EXIT_FAILURE); /* Le message d'erreur a été affiché. */    
     PARSER_BEGIN(&the_parser)
     PARSER_EXPECT_TEXTURE(&the_parser, "texture")
     PARSER_EXPECT_SPRITE(&the_parser, "sky", &g->main_menu.sky)
@@ -235,6 +299,7 @@ static void loadMapData(MapData *m, const char *filename) {
     Parser the_parser;
     if(!Parser_init(&the_parser, filename))
         exit(EXIT_FAILURE); /* Le message d'erreur a été affiché. */
+    Wall * current_wall = NULL;
     PARSER_BEGIN(&the_parser)
     PARSER_EXPECT_STRING(&the_parser, "name", m->name, MAP_NAME_LEN)
     PARSER_EXPECT_VEC2(&the_parser, "size", &m->size)
@@ -248,8 +313,12 @@ static void loadMapData(MapData *m, const char *filename) {
     PARSER_EXPECT_COLOR3(&the_parser, "checkpoint_highlight", &m->checkpoint_highlight)
     PARSER_EXPECT_MAPSTARTS(&the_parser, "start", m->start)
     PARSER_EXPECT_CHECKPOINTS(&the_parser, "checkpoint", m)
+    PARSER_EXPECT_OBSTACLE(&the_parser, "obstacle")
+    PARSER_EXPECT_WALL(&the_parser, "wall", m)
     PARSER_END(&the_parser)
     Parser_deinit(&the_parser);
+    if(current_wall) ConvexShape_free_content(&(current_wall->physic_obstacle.shape));
+    free(current_wall);
 }
 
 static void loadShipData(ShipData *s, const char *filename) {

@@ -3,14 +3,19 @@
 
 
 void Circle_init(ConvexShape * shape, Vec2 position, float radius) {
-    shape->type = CERCLE;
-    shape->shape.cercle.position = position;
-    shape->shape.cercle.radius = radius;
+    shape->type = CIRCLE;
+    shape->shape.circle.position = position;
+    shape->shape.circle.radius = radius;
 }
 
 void Shape_init(ConvexShape * shape, Polygon polygon) {
     shape->type = POLYGON;
     shape->shape.polygon = polygon;
+}
+
+void ConvexShape_free_content(ConvexShape * shape) {
+    if(shape->type == POLYGON)
+        free(shape->shape.polygon.vertices);
 }
 
 void Solid_init(Solid *solid, ConvexShape collision_shapes[], 
@@ -33,11 +38,11 @@ void Solid_init(Solid *solid, ConvexShape collision_shapes[],
     //non-initialisée, et pour éviter une potentielle division par zéro.
     for(; i < solid->nb_collision_shapes; ++i) {
         switch(solid->collision_shapes[i].type) {
-            case CERCLE: {
-                float mass_temp = M_PI * solid->collision_shapes[i].shape.cercle.radius;
+            case CIRCLE: {
+                float mass_temp = M_PI * solid->collision_shapes[i].shape.circle.radius;
                 mass += mass_temp;
                 mass_center = AddVec2(mass_center, MulVec2(
-                    solid->collision_shapes[i].shape.cercle.position, 
+                    solid->collision_shapes[i].shape.circle.position, 
                     mass_temp));
                     
                 break;
@@ -82,9 +87,9 @@ void Solid_init(Solid *solid, ConvexShape collision_shapes[],
     /* Translation de tous les points. */
     for(i = 0; i < solid->nb_collision_shapes; ++i) {
         switch(solid->collision_shapes[i].type) {
-            case CERCLE: {
-                solid->collision_shapes[i].shape.cercle.position = 
-                    SubVec2(solid->collision_shapes[i].shape.cercle.position,
+            case CIRCLE: {
+                solid->collision_shapes[i].shape.circle.position = 
+                    SubVec2(solid->collision_shapes[i].shape.circle.position,
                                 mass_center);
                 
                 break;

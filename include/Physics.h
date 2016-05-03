@@ -7,13 +7,13 @@
 /* Structures géométriques de base */
 
 typedef enum {
-    CERCLE, POLYGON
+    CIRCLE, POLYGON
 } ConvexShapeType;
 
 typedef struct {
     Vec2  position;
     float radius;
-} Cercle;
+} Circle;
 
 typedef struct { 
     Vec2     *vertices;
@@ -24,7 +24,7 @@ typedef struct {
 typedef struct {
     ConvexShapeType type;
     union {
-        Cercle  cercle;
+        Circle  circle;
         Polygon polygon;
     } shape;
 } ConvexShape;
@@ -98,6 +98,9 @@ typedef struct {
 } PhysicWorld;
 
 /* Fonctions */
+
+void ConvexShape_free_content(ConvexShape * shape); /* Libère les sommets du polygones
+                                                       si il y en a. */
 
 void Circle_init(ConvexShape * shape, Vec2 position, float radius);
 void Shape_init(ConvexShape * shape, Polygon polygon);

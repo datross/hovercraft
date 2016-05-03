@@ -62,10 +62,8 @@ void Game_deinit(Game *g) {
             glDeleteTextures(1, &g->ship_data[i].icon[p].tex_id);
             glDeleteTextures(1, &g->ship_data[i].artwork[p].tex_id);
         }
-    for(i=0 ; i<g->map_data_count ; ++i) {
-        glDeleteTextures(1, &g->map_data[i].terrain.tex_id);
-        glDeleteTextures(1, &g->map_data[i].artwork.tex_id);
-    }
+    for(i=0 ; i<g->map_data_count ; ++i)
+        MapData_free(&(g->map_data[i]));
     Monospace_cleanup();
 }
 
