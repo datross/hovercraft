@@ -16,6 +16,7 @@ typedef struct {
 } Circle;
 
 typedef struct { 
+    Vec2     position;
     Vec2     *vertices;
     unsigned nb_vertices;
 } Polygon; /* Les coordonnées des sommets sont
@@ -30,11 +31,12 @@ typedef struct {
 } ConvexShape;
 
 /* Forme de collision, statique. */
-typedef struct {
+typedef struct Obstacle {
     Vec2 position;
     float rotation;
     ConvexShape shape;
     char visited; /* Si la collision est déjà testée. */
+    struct Obstacle * next;
 } Obstacle;
 
 /* Solides physiques */
@@ -72,22 +74,19 @@ typedef struct Force {
                           * forces à appliquer. */
 } Force;
 
-typedef struct {
+/* PAS POUR LE MOMENT */
+/*typedef struct {
     Obstacle ** obstacles;
     unsigned nb_obstacles;
 } Cell;
-
 typedef struct {
     Cell ** grid;
     unsigned w, h;
-} Grid;
+} Grid;*/
 
 typedef struct {
-    Grid obstacles_grid;
-    Obstacle * obstacles; /* Tableau de tous les obstacles. */
-    unsigned nb_obstacles;
-    Solid *solids; /* Tous les objets du monde */
-    
+    Obstacle *obstacles; /* File de tous les obstacles du monde */
+    Solid *solids; /* File de tous les objets du monde */
     /* File des forces à appliquer */
     Force *forces_head, *forces_tail; /* head pointe vers le début
                                          * et tail vers la fin (là où on
@@ -101,16 +100,26 @@ typedef struct {
 
 void ConvexShape_free_content(ConvexShape * shape); /* Libère les sommets du polygones
                                                        si il y en a. */
-
 void Circle_init(ConvexShape * shape, Vec2 position, float radius);
 void Shape_init(ConvexShape * shape, Polygon polygon);
 void Solid_init(Solid *solid, ConvexShape collision_shapes[], 
                                         unsigned nb_collision_shapes,
                                         float inertia_moment,
                                         float mass);
-
+void World_clean(PhysicWorld * world);
 void World_addForce(PhysicWorld * world, Force * force);
 void World_addSolid(PhysicWorld * world, Solid * solid); 
+void World_addObstacle(PhysicWorld * world, Obstacle * obs);
+
+/* Retourne 1 si collision, 0 sinon.
+ * p1 et m1 sont les positions (on ne tient donc pas compte des positions
+ * que contient la ConvexShape) et mouvement de la forme.
+ * Si collision, pos_collision contient la position (repère global) de la 
+ * collision, et collision_time_ratio indique quand pendant le mouvement 
+ * la collision a lieu (donc €[0,1]). */
+int ConvexShape_compute_collision(ConvexShape *s1, Vec2 p1, Vec2 m1,
+                                    ConvexShape *s2, Vec2 p2, Vec2 m2,
+                                      Vec2 * pos_collision, float *collision_time_ratio);
 /* Calcule la force qu'exerce un solide en un point,
  * de part sa vitesse et sa rotation. */
 void Compute_force(Solid * solid, Force * force);

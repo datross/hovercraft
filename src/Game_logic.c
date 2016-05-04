@@ -78,7 +78,7 @@ static void Game_updateRaceToMapMenu(Game *g) {
 
 static void Game_updatePostRace(Game *g) { 
     size_t i;
-    /* FIXME penser à cleanup le Physics World ? */
+    World_clean(&(g->world));
     for(i=0 ; i<g->race.ship_count ; ++i) {
         Ship *s = g->race.ships+i;
         Ship_deinitPhysics(s);
@@ -247,6 +247,9 @@ static void Game_updatePreCountdown(Game *g) {
     g->race.world.forces_head  = NULL;
     g->race.world.forces_tail  = NULL;
     g->race.map.data = g->map_data + g->map_menu.selected_map_index;
+    for(unsigned i = 0; i < g->race.map.data.wall_count; ++i) {
+        World_addObstacle(g->world, &(g->race.map.data.walls[i].physic_obstacle));
+    }
     g->race.time_of_completion = 0;
     size_t i;
     for(i=0 ; i<g->race.ship_count ; ++i) {

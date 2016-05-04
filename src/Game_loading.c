@@ -237,11 +237,10 @@ void Parser_deinit(Parser *p) {
         else if(STREQ(read_key, key)) { \
             if(current_wall) ConvexShape_free_content(&(current_wall->physic_obstacle.shape)); \
             free(current_wall); \
-            if(!(current_wall = malloc(sizeof(Wall)))) { \
+            if(!(current_wall = calloc(sizeof(Wall)))) { \
                 fprintf(stderr, "Erreur allocation structure tampon pour chargement des obstacles.\n"); \
                 exit(EXIT_FAILURE); \
             } \
-            current_wall->physic_obstacle.visited = 0; \
             char type[10]; \
             PARSER_SSCANF(1, parser, "%10s", type); \
             if(!strcmp(type, "polygon")) { \
