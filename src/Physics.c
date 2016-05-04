@@ -160,7 +160,7 @@ int ConvexShape_compute_collision(ConvexShape *s1, Vec2 pos1, Vec2 mov1,
     if(s1->type == CIRCLE && s2->type == CIRCLE) {
         Vec2 _1_2 = SubVec2(p2, p1);
         Vec2 _3   = AddVec2(p1, m1);
-        Vec2 _1_3 = SubVec2(_3, _1);
+        Vec2 _1_3 = SubVec2(_3, p1);
         float dist_min = fabs(Scal2( _1_2, OrthogonalVec2(_1_3)));
         if(dist_min >= s1->shape.circle.radius + s2->shape.circle.radius) {
             return 0;
