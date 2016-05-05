@@ -186,10 +186,9 @@ static void Game_renderRaceView(const Game *g, size_t view_index) {
     gui_view.ortho_right = 1.f;
     gui_view.center.x = 0.f;
     gui_view.center.y = 0.f;
-    gui_view.tilt = -M_PI/2.f;
+    gui_view.tilt = 0;
     gui_view.viewport_pos = v->viewport_pos;
     gui_view.viewport_size = v->viewport_size;
-    gui_view.sym.x = gui_view.sym.y = -1.f;
     char str[16];
     snprintf(str, sizeof(str), "speed: %.6f", 
             sqrtf(

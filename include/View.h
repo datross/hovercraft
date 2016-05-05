@@ -19,8 +19,6 @@ typedef struct {
                          Pour les menus on le voudra à 1. In-game, on le
                          choisit avant la course par rapport à la taille des 
                          véhicules (Typiquement 8). */
-    Vec2 sym; /* C'est nul, mais pour le menu, il faut faire une symétrie horizontale et verticale pour que ça s'affiche dans le bon sens. 
-                  Ca m'ébouriffe complètement. */
 } View;
 
 void View_apply(const View *v);

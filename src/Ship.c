@@ -67,7 +67,7 @@ void Ship_renderBoundingVolumes(const Ship *s) {
     glPushMatrix();
     {
         glTranslatef(s->physic_solid.position.x, s->physic_solid.position.y, 0);
-        glRotatef((s->physic_solid.rotation - M_PI / 2.)*180.f/M_PI,0,0,1);
+        glRotatef(degf(s->physic_solid.rotation - M_PI/2.f),0,0,1);
         glPushMatrix(); 
         {
             glTranslatef(0, .5f, 0);
@@ -85,7 +85,7 @@ void Ship_render(const Ship *s) {
     glPushMatrix();
     {
         glTranslatef(s->physic_solid.position.x, s->physic_solid.position.y, 0);
-        glRotatef((s->physic_solid.rotation - M_PI / 2.)*180.f/M_PI,0,0,1);
+        glRotatef(degf(s->physic_solid.rotation-M_PI/2.f),0,0,1);
         Sprite_render(&s->data->above[s->above_index][s->palette_index]);
     }
     glPopMatrix();
