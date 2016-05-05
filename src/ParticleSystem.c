@@ -37,7 +37,6 @@ void ParticleSystem_compute_step(const ParticleSystem * ps, float elapsed_time) 
 }
 
 void ParticleSystem_draw_particles(const ParticleSystem * ps) {
-    glEnable(GL_BLEND);
     glEnable(GL_POINT_SMOOTH); /* TODO : Ne marche pas */
     GLfloat col[4];
     glGetFloatv(GL_CURRENT_COLOR, col);
@@ -51,7 +50,6 @@ void ParticleSystem_draw_particles(const ParticleSystem * ps) {
         glEnd();
     }
     glColor4f(col[0], col[1], col[2], col[3]);
-    glDisable(GL_BLEND);
 }
         
 void Particle_init(Particle * p, const ParticleSystem * ps) {
