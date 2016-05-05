@@ -30,5 +30,7 @@ put maps/dawn.txt
 put maps/dawn.png
 put maps/dawn_tile.png
 put maps/pensif_race.mp3
+put snd/menu_transition.wav
+put snd/clap_close.wav
 bye
 EOF

@@ -84,6 +84,7 @@ static void Game_updatePostRace(Game *g) {
         Ship *s = g->race.ships+i;
         Ship_deinit(s);
     }
+    Mix_HaltMusic();
     Mix_VolumeMusic(MIX_MAX_VOLUME);
     Mix_PlayMusic(g->main_music, -1);
     g->render = Game_renderMapMenuWithClap;
@@ -109,6 +110,7 @@ static void Game_updateRace(Game *g) {
             g->update = Game_updatePostRace;
         } else if(new_ms-g->race.time_of_completion > 2400 
                && g->clap_transition.update != ClapTransition_updateClose) {
+            Mix_PlayChannel(-1, g->snd_clap_close, 0);
             ClapTransition_start(&g->clap_transition, View_getOrthoTop(&g->menu_view));
             g->render = Game_renderRaceWithClap;
         }
@@ -338,7 +340,7 @@ static void Game_updatePostMapMenu(Game *g) {
     if(g->clap_transition.update == ClapTransition_updateOpen
     || g->clap_transition.update == ClapTransition_updateDummy) {
         g->update = Game_updatePreCountdown;
-        Mix_PauseMusic();
+        Mix_HaltMusic();
     }
     Mix_VolumeMusic(Mix_VolumeMusic(-1)-1);
 }
@@ -360,10 +362,12 @@ static void Game_updateMapMenu(Game *g) {
           p_map %= g->map_data_count;
     }
     if(PLAYERINPUT_PRESSED(p_input, escaping)) {
+        Mix_PlayChannel(-1, g->snd_menu_transition, 0);
         g->update = Game_updateShipMenu;
         FadeTransition_fadeTo(&g->fade_transition, Game_renderShipMenu);
     }
     if(PLAYERINPUT_PRESSED(p_input, accelerating)) {
+        Mix_PlayChannel(-1, g->snd_clap_close, 0);
         g->update = Game_updatePostMapMenu;
         g->render = Game_renderMapMenuWithClap;
         ClapTransition_start(&g->clap_transition, View_getOrthoTop(&g->menu_view));
@@ -393,6 +397,7 @@ void Game_updatePaletteSelection(Game *g) {
             ++p;
             g->update = Game_updateShipMenu;
         } else {
+            Mix_PlayChannel(-1, g->snd_menu_transition, 0);
             g->update = Game_updateMapMenu;
             FadeTransition_fadeTo(&g->fade_transition, Game_renderMapMenu);
         }
@@ -419,13 +424,15 @@ static void Game_updateShipMenu(Game *g) {
     if(PLAYERINPUT_PRESSED(p_input, zooming_out))
         if(p_ship==0 || p_ship==1)
             p_ship += 2;
-    if(PLAYERINPUT_PRESSED(p_input, accelerating))
+    if(PLAYERINPUT_PRESSED(p_input, accelerating)) {
         g->update = Game_updatePaletteSelection;
+    }
     if(PLAYERINPUT_PRESSED(p_input, escaping)) {
         if(p > 0) {
             --p;
             g->update = Game_updateShipMenu;
         } else {
+            Mix_PlayChannel(-1, g->snd_menu_transition, 0);
             g->update = Game_updateMainMenu;
             FadeTransition_fadeTo(&g->fade_transition, Game_renderMainMenu);
         }
@@ -436,6 +443,7 @@ static void Game_updateShipMenu(Game *g) {
 }
 static void Game_updateMainMenu(Game *g) { 
     if(PLAYERINPUT_PRESSED(g->input.players[0], accelerating)) {
+        Mix_PlayChannel(-1, g->snd_menu_transition, 0);
         g->ship_menu.player_index = 0;
         g->update = Game_updateShipMenu;
         FadeTransition_fadeTo(&g->fade_transition, Game_renderShipMenu);

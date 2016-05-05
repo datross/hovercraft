@@ -29,5 +29,7 @@ newer maps/dawn.txt
 newer maps/dawn.png
 newer maps/dawn_tile.png
 newer maps/pensif_race.mp3
+newer snd/menu_transition.wav
+newer snd/clap_close.wav
 bye
 EOF
