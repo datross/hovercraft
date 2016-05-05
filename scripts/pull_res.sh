@@ -16,6 +16,9 @@ newer ships/dolphin_unicorn_pal.png
 newer ships/dolphin_unicorn_tex.png
 newer ships/dolphin_unicorn_artwork.png
 newer ships/raging_waffle.txt
+newer ships/raging_waffle_pal.png
+newer ships/raging_waffle_tex.png
+newer ships/raging_waffle_artwork.png
 newer ships/darkness_of_evil.txt
 newer ships/regular_ship.txt
 newer ships/1x1.png
