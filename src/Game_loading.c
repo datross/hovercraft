@@ -155,7 +155,7 @@ void Parser_deinit(Parser *p) {
                 exit(EXIT_FAILURE); \
             } \
             size_t p, y, x, c; \
-            GLubyte *indices = malloc((parser)->teximg->w*(parser)->teximg->h); \
+            GLubyte *indices = calloc((parser)->teximg->w*(parser)->teximg->h,1); \
             if(!indices) { \
                 fprintf(stderr, "N'a pas pu allouer %u indices.\n", (parser)->teximg->w*(parser)->teximg->h); \
                 exit(EXIT_FAILURE); \

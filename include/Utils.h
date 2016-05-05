@@ -183,10 +183,10 @@ static inline GLuint Tex_loadFromIndices(SDL_Surface *pal, size_t palindex, size
     GLfloat gmap[MAX_PAL_COLORS];
     GLfloat bmap[MAX_PAL_COLORS];
     GLfloat amap[MAX_PAL_COLORS];
-    memset(rmap, 20, sizeof(rmap));
-    memset(gmap, 20, sizeof(gmap));
-    memset(bmap, 20, sizeof(bmap));
-    memset(amap, 20, sizeof(amap));
+    memset(rmap, 0, sizeof(rmap));
+    memset(gmap, 0, sizeof(gmap));
+    memset(bmap, 0, sizeof(bmap));
+    memset(amap, 0, sizeof(amap));
     size_t c;
     for(c=0 ; c<pal->w ; ++c) {
         rmap[c+1] = getR(pal, palindex, c)/255.f;
@@ -194,6 +194,11 @@ static inline GLuint Tex_loadFromIndices(SDL_Surface *pal, size_t palindex, size
         bmap[c+1] = getB(pal, palindex, c)/255.f;
         amap[c+1] = getA(pal, palindex, c)/255.f;
     }
+    glPixelMapfv(GL_PIXEL_MAP_I_TO_R, MAX_PAL_COLORS, rmap);
+    glPixelMapfv(GL_PIXEL_MAP_I_TO_G, MAX_PAL_COLORS, gmap);
+    glPixelMapfv(GL_PIXEL_MAP_I_TO_B, MAX_PAL_COLORS, bmap);
+    glPixelMapfv(GL_PIXEL_MAP_I_TO_A, MAX_PAL_COLORS, amap);
+
     GLuint tex;
     glGenTextures(1, &tex);
     glBindTexture(GL_TEXTURE_2D, tex);
@@ -201,11 +206,6 @@ static inline GLuint Tex_loadFromIndices(SDL_Surface *pal, size_t palindex, size
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-
-    glPixelMapfv(GL_PIXEL_MAP_I_TO_R, MAX_PAL_COLORS, rmap);
-    glPixelMapfv(GL_PIXEL_MAP_I_TO_G, MAX_PAL_COLORS, gmap);
-    glPixelMapfv(GL_PIXEL_MAP_I_TO_B, MAX_PAL_COLORS, bmap);
-    glPixelMapfv(GL_PIXEL_MAP_I_TO_A, MAX_PAL_COLORS, amap);
 
     glPixelTransferi(GL_MAP_COLOR,GL_TRUE);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 
