@@ -54,7 +54,7 @@ void Game_init(Game *g) {
     Game_loadMaps(g, "res/maps");
     Game_reshape(g);
 }
-void Game_deinit(Game *g) {
+void Game_deinit(Game *g) {    
     glDeleteTextures(1, &g->main_menu.sky.tex_id);
     size_t i, p;
     for(i=0 ; i<MAX_SHIPS ; ++i)

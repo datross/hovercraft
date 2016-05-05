@@ -8,6 +8,7 @@
 #include <SDL/SDL_image.h>
 #include <GL/gl.h>
 #include <Vec.h>
+#include <time.h>
 
 #define max(a,b) ((a)>(b) ? (a) : (b))
 #define degf(a) ((a)*180.f/M_PI)
@@ -16,6 +17,18 @@
 typedef struct {
     float r, g, b;
 } Color3;
+
+static inline void Random_init() {
+    srand(time(NULL));
+}
+
+static inline float Rand_f_0_1() { /* entre 0 et 1 */
+    return (float)rand() / (float)RAND_MAX;
+}
+
+static inline float Rand_f_1() { /* entre -1 et 1 */
+    return -1 + 2*(float)rand() / (float)RAND_MAX;
+}
 
 static inline void renderSquare(bool full) {
     glBegin(full ? GL_QUADS : GL_LINE_LOOP);

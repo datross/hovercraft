@@ -347,12 +347,15 @@ static void loadShipData(ShipData *s, const char *filename) {
     PARSER_EXPECT_PALETTED_SPRITES(&the_parser, "above7",  s->above[7])
     PARSER_EXPECT_PALETTED_SPRITES(&the_parser, "above8",  s->above[8])
     PARSER_EXPECT_PALETTED_SPRITES(&the_parser, "above9",  s->above[9])
+    PARSER_EXPECT_VEC2(&the_parser, "reactor_position", &(s->reactor_position))
     PARSER_END(&the_parser)
     Parser_deinit(&the_parser);
     size_t i, p;
     for(i=0 ; i<10 ; ++i)
         for(p=0 ; p<MAX_PALETTES ; ++p)
             Sprite_resizeToWidth(&s->above[i][p], width);
+    s->reactor_distance_to_center = sqrt(Scal2(s->reactor_position,
+                                            s->reactor_position));
 }
 
 void Game_loadMaps(Game *g, const char *dirname) {

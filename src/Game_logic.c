@@ -81,7 +81,7 @@ static void Game_updatePostRace(Game *g) {
     World_clean(&(g->race.world));
     for(i=0 ; i<g->race.ship_count ; ++i) {
         Ship *s = g->race.ships+i;
-        Ship_deinitPhysics(s);
+        Ship_deinit(s);
     }
     g->render = Game_renderMapMenuWithClap;
     g->update = Game_updateRaceToMapMenu;
@@ -109,15 +109,26 @@ static void Game_updateRace(Game *g) {
             g->render = Game_renderRaceWithClap;
         }
     }
-
+    Process_physics(&(g->race.world), g->tickrate);
     size_t i;
     for(i=0 ; i<g->race.ship_count ; ++i) {
         Ship *s = g->race.ships+i;
-
+        
+        Vec2 ship_direction = MakeVec2(cos(s->physic_solid.rotation),
+                                       sin(s->physic_solid.rotation));
+        s->particle_system_reactor.source_position = LocalToGlobal2(s->data->reactor_position,
+                                            s->physic_solid.position, s->physic_solid.rotation);
+        s->particle_system_reactor.source_speed = AddVec2(s->physic_solid.speed,
+                        MulVec2(OrthogonalVec2(ship_direction), - s->physic_solid.rotation_speed * s->data->reactor_distance_to_center));
+        s->particle_system_reactor.emit_direction =  MulVec2(ship_direction, -0.2 * REACTOR_PARTICLES_SPEED);
+        s->particle_system_reactor.particle_size = REACTOR_PARTICLES_SIZE * g->race.views[i].zoom;
         if(g->input.players[i].now.accelerating) {
             s->main_translate_force.force.x = s->data->accel_multiplier*cosf(s->physic_solid.rotation);
             s->main_translate_force.force.y = s->data->accel_multiplier*sinf(s->physic_solid.rotation);
             World_addForce(&(g->race.world), &(s->main_translate_force));
+            
+            s->particle_system_reactor.emit_direction.x *= 5.;
+            s->particle_system_reactor.emit_direction.y *= 5.;
         } 
 
         if(g->input.players[i].now.left_tilting) {
@@ -151,9 +162,9 @@ static void Game_updateRace(Game *g) {
             /*s->vel.x *= s->max_speed/speed;
             s->vel.y *= s->max_speed/speed;*/
         }
+        
+        ParticleSystem_compute_step(&(s->particle_system_reactor), g->tickrate);
     }
-
-	Process_physics(&(g->race.world), g->tickrate);
 
     for(i=0 ; i<g->race.ship_count ; ++i) {
         Ship *s = g->race.ships+i;
@@ -255,7 +266,7 @@ static void Game_updatePreCountdown(Game *g) {
     for(i=0 ; i<g->race.ship_count ; ++i) {
         g->race.rankings[i] = 0;
         g->race.completion_times[i] = 0;
-        Ship_initPhysics(g->race.ships + i);
+        Ship_init(g->race.ships + i);
         World_addSolid(&(g->race.world), &(g->race.ships[i].physic_solid)); 
         g->race.ships[i].physic_solid.position.x = g->race.map.data->start[i].pos.x;
         g->race.ships[i].physic_solid.position.y = g->race.map.data->start[i].pos.y;
@@ -271,6 +282,24 @@ static void Game_updatePreCountdown(Game *g) {
         g->race.ships[i].guides[0].r = 0;
         g->race.ships[i].guides[0].g = 0;
         g->race.ships[i].guides[0].b = 0;
+        g->race.ships[i].particle_system_reactor.particle_color.r = 1.0;
+        g->race.ships[i].particle_system_reactor.particle_color.g = 0.5;
+        g->race.ships[i].particle_system_reactor.particle_color.b = 0.3; // TODO : mettre la bonne couleur
+        g->race.ships[i].particle_system_reactor.source_position = LocalToGlobal2(g->race.ships[i].data->reactor_position,
+                                            g->race.ships[i].physic_solid.position, g->race.ships[i].physic_solid.rotation);
+        g->race.ships[i].particle_system_reactor.emit_direction = MakeVec2(cos(g->race.ships[i].physic_solid.rotation),
+                                                                            cos(g->race.ships[i].physic_solid.rotation));
+        g->race.ships[i].particle_system_reactor.source_speed = MakeVec2(0,0);
+        g->race.ships[i].particle_system_reactor.source_radius_max = 0.05;
+        g->race.ships[i].particle_system_reactor.particle_size = REACTOR_PARTICLES_SIZE;
+        g->race.ships[i].particle_system_reactor.particle_size_dispersion = 2;
+        g->race.ships[i].particle_system_reactor.emit_direction_dispersion = 0.07;
+        g->race.ships[i].particle_system_reactor.emit_speed_dispersion = 1.;
+        g->race.ships[i].particle_system_reactor.life_time_max = 70;
+        g->race.ships[i].particle_system_reactor.life_time_dispersion = 1.;
+        g->race.ships[i].particle_system_reactor.color_dispersion = 0.2;
+        g->race.ships[i].particle_system_reactor.dampness = 1;
+        ParticleSystem_init_particles(&(g->race.ships[i].particle_system_reactor));
         if(g->player_count == 2) {
             const size_t j = (i+1)%(g->race.ship_count);
             g->race.ships[i].guides[1].pos.x = g->race.ships[j].physic_solid.position.x;
@@ -413,8 +442,8 @@ static void Game_updateMainMenu(Game *g) {
 
     if(PLAYERINPUT_PRESSED(g->input.players[0], escaping))
         g->quit = true;
-
 }
+
 void Game_updateStartScreen(Game *g) {
     g->render = Game_renderMainMenu;
     g->update = Game_updateMainMenu;

@@ -21,6 +21,8 @@ int main(int argc, char* argv[]) {
         printf("IMG_Init: %s\n", IMG_GetError());
         return EXIT_FAILURE;
     }
+    
+    Random_init();
 
     Game game;
     Game_init(&game);

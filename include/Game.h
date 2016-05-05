@@ -11,6 +11,7 @@
 #include <Physics.h>
 #include <Sprite.h>
 #include <GameLimits.h>
+#include <ParticleSystem.h>
 
 typedef struct {
     unsigned accelerating  : 1;

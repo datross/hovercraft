@@ -4,7 +4,7 @@
 #include <Ship.h>
 #include <Utils.h>
 
-void Ship_initPhysics(Ship *s) {
+void Ship_init(Ship *s) {
     /* Dès ici, c'est safe de se référer au ShipData pour choisir la shape
      * de collision. Surtout ce champs :
      *     s->data.above[0][0].half_size
@@ -36,10 +36,13 @@ void Ship_initPhysics(Ship *s) {
 	s->main_translation_friction.position = MakeVec2(0,0);
 	s->main_rotation_friction.type = COUPLE;
 	s->main_rotation_friction.solid = &(s->physic_solid);
+    
+    ParticleSystem_allocate_particles(&(s->particle_system_reactor), REACTOR_PARTICLES_COUNT);
 }
 
-void Ship_deinitPhysics(Ship *s) {
+void Ship_deinit(Ship *s) {
     free(s->physic_solid.collision_shapes[0].shape.polygon.vertices);
+    ParticleSystem_free_particles(&(s->particle_system_reactor));
 }
 
 void Ship_renderGuides(const Ship *s) {
@@ -86,6 +89,7 @@ void Ship_render(const Ship *s) {
         Sprite_render(&s->data->above[s->above_index][s->palette_index]);
     }
     glPopMatrix();
+    ParticleSystem_draw_particles(&(s->particle_system_reactor));
 }
 void Ship_refreshGuides(Ship *s) {
     size_t i;

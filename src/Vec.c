@@ -46,6 +46,11 @@ float PseudoVectProd2(Vec2 a, Vec2 b) {
     return a.x * b.y - a.y * b.x;
 }
 
+Vec2 Rotate2(Vec2 u, float angle) {
+    float c = cosf(angle), s = sinf(angle);
+    return MakeVec2(c * u.x - s * u.y, s * u.x + c * u.y);
+}
+
 Vec2 LocalToGlobal2(Vec2 local_position, Vec2 base_position, float base_angle) {
     float c = cosf(base_angle), s = sinf(base_angle);
 

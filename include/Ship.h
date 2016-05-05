@@ -7,6 +7,11 @@
 #include <GameLimits.h>
 #include <stdlib.h>
 #include <string.h>
+#include <ParticleSystem.h>
+
+#define REACTOR_PARTICLES_COUNT 400
+#define REACTOR_PARTICLES_SPEED 0.2
+#define REACTOR_PARTICLES_SIZE  2.
 
 typedef struct {
     Vec2  pos; /* Ciblage d'objectif. */
@@ -27,6 +32,9 @@ typedef struct {
     Sprite icon[MAX_PALETTES];
     Sprite artwork[MAX_PALETTES];
     Sprite above[10][MAX_PALETTES];
+    Vec2 reactor_position; /* Dans repère local */
+    float reactor_distance_to_center; /* Pour ne pas le calculer
+                                         à chaque fois. */
 } ShipData;
 
 /* On distingue une _occurrence_ de vaisseau de ses _données_chargées_. 
@@ -45,10 +53,11 @@ typedef struct {
     Force main_rotate_force;
     Force main_translation_friction;
     Force main_rotation_friction;
+    ParticleSystem particle_system_reactor;
 } Ship;
 
-void Ship_initPhysics(Ship *s);
-void Ship_deinitPhysics(Ship *s);
+void Ship_init(Ship *s);
+void Ship_deinit(Ship *s);
 void Ship_render(const Ship *s);
 void Ship_renderGuides(const Ship *s);
 void Ship_renderBoundingVolumes(const Ship *s);

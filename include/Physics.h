@@ -112,13 +112,13 @@ void World_addSolid(PhysicWorld * world, Solid * solid);
 void World_addObstacle(PhysicWorld * world, Obstacle * obs);
 
 /* Retourne 1 si collision, 0 sinon.
- * p1 et m1 sont les positions (on ne tient donc pas compte des positions
- * que contient la ConvexShape) et mouvement de la forme.
+ * p1, r1 et m1 sont les positions, rotations (on tient compte des positions
+ * que contiennent les ConvexShape) et mouvement de la forme.
  * Si collision, pos_collision contient la position (repère global) de la 
  * collision, et collision_time_ratio indique quand pendant le mouvement 
  * la collision a lieu (donc €[0,1]). */
-int ConvexShape_compute_collision(ConvexShape *s1, Vec2 p1, Vec2 m1,
-                                    ConvexShape *s2, Vec2 p2, Vec2 m2,
+int ConvexShape_compute_collision(ConvexShape *s1, Vec2 p1, float r1, Vec2 m1,
+                                    ConvexShape *s2, Vec2 p2, float r2, Vec2 m2,
                                       Vec2 * pos_collision, float *collision_time_ratio);
 /* Calcule la force qu'exerce un solide en un point,
  * de part sa vitesse et sa rotation. */
