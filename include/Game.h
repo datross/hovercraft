@@ -161,6 +161,7 @@ void Game_renderStartScreen(const Game *g);
 void Game_loadMenus(Game *g, const char *dirname);
 void Game_loadShips(Game *g, const char *dirname);
 void Game_loadMaps(Game *g, const char *dirname);
+void Game_loadSounds(Game *g, const char *dirname_music_menu, const char *dirname_snd);
 
 void Game_resizeViewports(Game *g);
 

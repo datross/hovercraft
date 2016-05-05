@@ -14,6 +14,7 @@ void MapData_free(MapData * m) {
         ConvexShape_free_content(&(m->walls[m->wall_count].physic_obstacle.shape));
     }
     free(m->walls);
+    if(m->music) Mix_FreeMusic(m->music);
 }
 
 static void Map_renderCheckpoint(const Checkpoint *c) {

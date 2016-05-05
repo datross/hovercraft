@@ -1,6 +1,8 @@
 #ifndef MAP_H
 #define MAP_H
 
+#include <SDL/SDL_mixer.h>
+
 #include <Vec.h>
 #include <Utils.h>
 #include <GameLimits.h>
@@ -39,6 +41,7 @@ typedef struct {
     size_t checkpoint_count;
     Wall * walls;
     size_t wall_count;
+    Mix_Music * music;
 } MapData;
 
 typedef struct {

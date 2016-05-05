@@ -72,8 +72,9 @@ static void Game_updateMainMenu(Game *g);
 static void Game_updateMapMenu(Game *g);
 
 static void Game_updateRaceToMapMenu(Game *g) {
-    if(g->clap_transition.update == ClapTransition_updateDummy)
+    if(g->clap_transition.update == ClapTransition_updateDummy) {
         g->update = Game_updateMapMenu;
+    }
 }
 
 static void Game_updatePostRace(Game *g) { 
@@ -83,6 +84,8 @@ static void Game_updatePostRace(Game *g) {
         Ship *s = g->race.ships+i;
         Ship_deinit(s);
     }
+    Mix_VolumeMusic(MIX_MAX_VOLUME);
+    Mix_PlayMusic(g->main_music, -1);
     g->render = Game_renderMapMenuWithClap;
     g->update = Game_updateRaceToMapMenu;
 }
@@ -101,6 +104,7 @@ static void Game_updateRace(Game *g) {
     g->race.step_ms = new_ms;
 
     if(g->race.time_of_completion) {
+        Mix_VolumeMusic(Mix_VolumeMusic(-1)-1);
         if(g->clap_transition.update == ClapTransition_updateStayClosed) {
             g->update = Game_updatePostRace;
         } else if(new_ms-g->race.time_of_completion > 2400 
@@ -240,6 +244,8 @@ static void Game_updateCountdown(Game *g) {
     }
     if(ms_left <= 0) {
         puts("Go!!!");
+        Mix_VolumeMusic(MIX_MAX_VOLUME);
+        Mix_PlayMusic(g->race.map.data->music, -1);
         g->update = Game_updateRace;
         g->update(g);
         return;
@@ -330,8 +336,11 @@ static void Game_updatePostMapMenu(Game *g) {
     if(g->clap_transition.update != ClapTransition_updateClose)
         g->render = Game_renderRaceWithClap;
     if(g->clap_transition.update == ClapTransition_updateOpen
-    || g->clap_transition.update == ClapTransition_updateDummy)
+    || g->clap_transition.update == ClapTransition_updateDummy) {
         g->update = Game_updatePreCountdown;
+        Mix_PauseMusic();
+    }
+    Mix_VolumeMusic(Mix_VolumeMusic(-1)-1);
 }
 static void Game_updateShipMenu(Game *g);
 static void Game_updateMapMenu(Game *g) {
@@ -445,6 +454,7 @@ static void Game_updateMainMenu(Game *g) {
 void Game_updateStartScreen(Game *g) {
     g->render = Game_renderMainMenu;
     g->update = Game_updateMainMenu;
+    Mix_PlayMusic(g->main_music, -1);
     g->update(g);
 }
 void Game_update(Game *g) {

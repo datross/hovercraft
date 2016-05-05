@@ -47,6 +47,8 @@ void Game_init(Game *g) {
     SDL_GL_SwapBuffers();
     puts("Chargement des menus...");
     Game_loadMenus(g, "res/menus");
+    puts("Chargement des sons et musiques...");
+    Game_loadSounds(g, "res/menus", "res/snd");
     puts("Chargement des bateaux...");
     Game_loadShips(g, "res/ships");
     puts("Chargement des maps...");
@@ -64,6 +66,7 @@ void Game_deinit(Game *g) {
     for(i=0 ; i<g->map_data_count ; ++i)
         MapData_free(&(g->map_data[i]));
     Monospace_cleanup();
+    Mix_FreeMusic(g->main_music);
 }
 
 static void Game_quit(Game *g) {

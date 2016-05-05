@@ -266,7 +266,15 @@ void Parser_deinit(Parser *p) {
                 exit(EXIT_FAILURE); \
             } \
         }
-
+#define PARSER_EXPECT_MUSIC(parser, key, mapdata) \
+        else if(STREQ(read_key, key)) { \
+            char music_path[PARSER_MAX_FILE_NAME_SIZE]; \
+            PARSER_SSCANF(1, parser, "%s", music_path); \
+            if(!(mapdata->music = Mix_LoadMUS(music_path))) { \
+                fprintf(stderr, "Erreur chargement musique : %s\n", music_path); \
+                exit(EXIT_FAILURE); \
+            } \
+        }
 
 void Game_loadMenus(Game *g, const char *dirname) {
     Util_pushd(dirname);
@@ -314,6 +322,7 @@ static void loadMapData(MapData *m, const char *filename) {
     PARSER_EXPECT_CHECKPOINTS(&the_parser, "checkpoint", m)
     PARSER_EXPECT_OBSTACLE(&the_parser, "obstacle")
     PARSER_EXPECT_WALL(&the_parser, "wall", m)
+    PARSER_EXPECT_MUSIC(&the_parser, "music", m)
     PARSER_END(&the_parser)
     Parser_deinit(&the_parser);
     if(current_wall) ConvexShape_free_content(&(current_wall->physic_obstacle.shape));
@@ -409,5 +418,11 @@ void Game_loadShips(Game *g, const char *dirname) {
         ++i;
     }
     closedir(dir);
+    Util_popd();
+}
+
+void Game_loadSounds(Game *g, const char *dirname_music, const char *dirname_snd) {
+    Util_pushd(dirname_music);
+    g->main_music = Mix_LoadMUS("main_menu_music.mp3");
     Util_popd();
 }
