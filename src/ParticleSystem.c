@@ -4,7 +4,6 @@
 #include <GL/gl.h>
 
 void ParticleSystem_allocate_particles(ParticleSystem * ps, unsigned nb_particles) {
-    free(ps->particles);
     if(!(ps->particles = calloc(nb_particles, sizeof(Particle)))) {
         fprintf(stderr, "Erreur mémoire allocation particules.\n");
         exit(EXIT_FAILURE);

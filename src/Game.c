@@ -24,10 +24,9 @@ void Game_init(Game *g) {
     g->update = Game_updateStartScreen;
     g->render = Game_renderStartScreen;
     g->player_count = 1;
-    g->menu_view.tilt = -M_PI/2.f;
+    g->menu_view.tilt = 0;
     g->menu_view.zoom = 1.f;
     g->menu_view.ortho_right = 1.f;
-    g->menu_view.sym.x = g->menu_view.sym.y = -1.f;
     g->clap_transition.update = ClapTransition_updateDummy;
     g->fade_transition.update = FadeTransition_updateDummy;
     g->fade_transition.alpha = 1.f;

@@ -200,7 +200,7 @@ static void Game_updateRace(Game *g) {
             break;
         g->race.views[i].center = s->physic_solid.position;
         //g->views[i].tilt = atan(s->physic_solid.speed.y / s->physic_solid.speed.x);
-        g->race.views[i].tilt = s->physic_solid.rotation;
+        g->race.views[i].tilt = s->physic_solid.rotation-M_PI/2.f;
         reactToZoom(g, i);
         /* if(i==0)printf("zoom : %f\n", g->views[i].zoom); */
     }
@@ -316,11 +316,9 @@ static void Game_updatePreCountdown(Game *g) {
     for(i=0 ; i<g->race.view_count ; ++i) {
         g->race.views[i].center.x = g->race.ships[i].physic_solid.position.x;
         g->race.views[i].center.y = g->race.ships[i].physic_solid.position.y;
-        g->race.views[i].tilt = g->race.ships[i].physic_solid.rotation;
+        g->race.views[i].tilt = g->race.ships[i].physic_solid.rotation-M_PI/2.f;
         g->race.views[i].ortho_right = 8.f;
         g->race.views[i].zoom = 2.f;
-        g->race.views[i].sym.x = 1.f;
-        g->race.views[i].sym.y = 1.f;
     }
     g->race.time_ms = -5000;
     g->race.step_ms = SDL_GetTicks();
