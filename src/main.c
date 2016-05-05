@@ -22,6 +22,12 @@ int main(int argc, char* argv[]) {
         return EXIT_FAILURE;
     }
     
+    if(Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, MIX_DEFAULT_CHANNELS, 1024) == -1) 
+    {
+        printf("%s", Mix_GetError());
+        exit(EXIT_FAILURE);
+    }
+    
     Random_init();
 
     Game game;
@@ -50,6 +56,7 @@ int main(int argc, char* argv[]) {
     }
     
     Game_deinit(&game);
+    Mix_CloseAudio();
     IMG_Quit();
     SDL_Quit();
     

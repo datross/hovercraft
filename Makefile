@@ -4,7 +4,7 @@ CC = gcc
 # -Wall active -Wswitch, qui râle dès qu'on ne traite pas tous les cas
 # possibles dans des switch() - Inacceptable pour des switchs de touches du clavier.
 CFLAGS = -g -std=c99 -Wall -Wno-switch -O3 -D_GNU_SOURCE
-LDFLAGS = -lm -lGL -lGLU -lSDL -lSDL_image
+LDFLAGS = -lm -lGL -lGLU -lSDL -lSDL_image -lSDL_mixer
 
 APP_BIN = hovercraft
 

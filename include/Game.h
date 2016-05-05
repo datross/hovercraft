@@ -3,6 +3,7 @@
 
 #include <stdint.h>
 #include <SDL/SDL.h>
+#include <SDL/SDL_mixer.h>
 
 #include <Vec.h>
 #include <View.h>
@@ -115,6 +116,7 @@ struct Game {
     MapMenu map_menu;
     FadeTransition fade_transition;
     ClapTransition clap_transition;
+    Mix_Music *main_music;
     Race race;
     ShipData ship_data[MAX_SHIPS];
     MapData map_data[MAX_MAPS];

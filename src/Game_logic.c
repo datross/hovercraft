@@ -283,19 +283,19 @@ static void Game_updatePreCountdown(Game *g) {
         g->race.ships[i].guides[0].g = 0;
         g->race.ships[i].guides[0].b = 0;
         g->race.ships[i].particle_system_reactor.particle_color.r = 1.0;
-        g->race.ships[i].particle_system_reactor.particle_color.g = 0.5;
-        g->race.ships[i].particle_system_reactor.particle_color.b = 0.3; // TODO : mettre la bonne couleur
+        g->race.ships[i].particle_system_reactor.particle_color.g = 1.0;
+        g->race.ships[i].particle_system_reactor.particle_color.b = 0.8;
         g->race.ships[i].particle_system_reactor.source_position = LocalToGlobal2(g->race.ships[i].data->reactor_position,
                                             g->race.ships[i].physic_solid.position, g->race.ships[i].physic_solid.rotation);
         g->race.ships[i].particle_system_reactor.emit_direction = MakeVec2(cos(g->race.ships[i].physic_solid.rotation),
                                                                             cos(g->race.ships[i].physic_solid.rotation));
         g->race.ships[i].particle_system_reactor.source_speed = MakeVec2(0,0);
-        g->race.ships[i].particle_system_reactor.source_radius_max = 0.05;
+        g->race.ships[i].particle_system_reactor.source_radius_max = 0.02;
         g->race.ships[i].particle_system_reactor.particle_size = REACTOR_PARTICLES_SIZE;
         g->race.ships[i].particle_system_reactor.particle_size_dispersion = 2;
-        g->race.ships[i].particle_system_reactor.emit_direction_dispersion = 0.07;
+        g->race.ships[i].particle_system_reactor.emit_direction_dispersion = 0.7;
         g->race.ships[i].particle_system_reactor.emit_speed_dispersion = 1.;
-        g->race.ships[i].particle_system_reactor.life_time_max = 70;
+        g->race.ships[i].particle_system_reactor.life_time_max = 210;
         g->race.ships[i].particle_system_reactor.life_time_dispersion = 1.;
         g->race.ships[i].particle_system_reactor.color_dispersion = 0.2;
         g->race.ships[i].particle_system_reactor.dampness = 1;

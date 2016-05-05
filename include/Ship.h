@@ -9,8 +9,8 @@
 #include <string.h>
 #include <ParticleSystem.h>
 
-#define REACTOR_PARTICLES_COUNT 400
-#define REACTOR_PARTICLES_SPEED 0.2
+#define REACTOR_PARTICLES_COUNT 300
+#define REACTOR_PARTICLES_SPEED 0.06
 #define REACTOR_PARTICLES_SIZE  2.
 
 typedef struct {
