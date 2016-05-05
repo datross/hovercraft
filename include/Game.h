@@ -116,11 +116,18 @@ struct Game {
     MapMenu map_menu;
     FadeTransition fade_transition;
     ClapTransition clap_transition;
-    Mix_Music *main_music;
     Race race;
     ShipData ship_data[MAX_SHIPS];
     MapData map_data[MAX_MAPS];
     size_t map_data_count;
+#define SOUND_CHANNEL_NBR 10
+    Mix_Music *main_music;
+    Mix_Chunk *snd_menu_transition,
+              *snd_clap_close;
+              /**snd_count_down_3,
+              *snd_count_down_2,
+              *snd_count_down_1,
+              *snd_count_down_0;*/
 };
 
 /* Game_init() seul ne suffit pas à afficher le jeu. 

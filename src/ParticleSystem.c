@@ -37,7 +37,6 @@ void ParticleSystem_compute_step(const ParticleSystem * ps, float elapsed_time) 
 }
 
 void ParticleSystem_draw_particles(const ParticleSystem * ps) {
-    glEnable(GL_POINT_SMOOTH); /* TODO : Ne marche pas */
     GLfloat col[4];
     glGetFloatv(GL_CURRENT_COLOR, col);
     for(unsigned i = 0; i < ps->particle_count; ++i) {

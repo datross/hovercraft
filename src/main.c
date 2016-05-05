@@ -27,6 +27,7 @@ int main(int argc, char* argv[]) {
         printf("%s", Mix_GetError());
         exit(EXIT_FAILURE);
     }
+    Mix_AllocateChannels(SOUND_CHANNEL_NBR);
     
     Random_init();
 

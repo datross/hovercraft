@@ -425,4 +425,13 @@ void Game_loadSounds(Game *g, const char *dirname_music, const char *dirname_snd
     Util_pushd(dirname_music);
     g->main_music = Mix_LoadMUS("main_menu_music.mp3");
     Util_popd();
+    Util_pushd(dirname_snd);
+#define LOAD_SND(ptr, file) \
+    if(!(ptr = Mix_LoadWAV(file))) { \
+        fprintf(stderr, "Erreur chargement son : %s.\n", file); \
+        exit(EXIT_FAILURE); \
+    } 
+    LOAD_SND(g->snd_menu_transition, "menu_transition.wav")
+    LOAD_SND(g->snd_clap_close     , "clap_close.wav")
+    Util_popd();
 }
