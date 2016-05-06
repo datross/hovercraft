@@ -21,7 +21,14 @@ int main(int argc, char* argv[]) {
         printf("IMG_Init: %s\n", IMG_GetError());
         return EXIT_FAILURE;
     }
-    
+   /* 
+    flags = MIX_INIT_OGG | MIX_INIT_MP3;
+    if((Mix_Init(flags) & flags) != flags) {
+        printf("Mix_Init: Failed to init required ogg and mp3 support!\n");
+        printf("Mix_Init: %s\n", Mix_GetError());
+        exit(EXIT_FAILURE);
+    }
+    */
     if(Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, MIX_DEFAULT_CHANNELS, 1024) == -1) 
     {
         printf("%s", Mix_GetError());
@@ -58,6 +65,7 @@ int main(int argc, char* argv[]) {
     
     Game_deinit(&game);
     Mix_CloseAudio();
+    /* Mix_Quit(); */
     IMG_Quit();
     SDL_Quit();
     
