@@ -58,6 +58,7 @@ static void ClapTransition_updateClose(ClapTransition *ct, float top) {
         ct->bottom_pos.y = -ct->bottom.half_size.y;
         ct->update = ClapTransition_updateStayClosed;
         ct->time_of_closing = SDL_GetTicks();
+        Mix_PlayChannel(-1, ct->snd_clap_close, 0);
     }
 }
 
@@ -84,7 +85,7 @@ static void Game_updatePostRace(Game *g) {
         Ship *s = g->race.ships+i;
         Ship_deinit(s);
     }
-    Mix_HaltMusic();
+    //Mix_HaltMusic();
     Mix_VolumeMusic(MIX_MAX_VOLUME);
     Mix_PlayMusic(g->main_music, -1);
     g->render = Game_renderMapMenuWithClap;
@@ -110,7 +111,6 @@ static void Game_updateRace(Game *g) {
             g->update = Game_updatePostRace;
         } else if(new_ms-g->race.time_of_completion > 2400 
                && g->clap_transition.update != ClapTransition_updateClose) {
-            Mix_PlayChannel(-1, g->snd_clap_close, 0);
             ClapTransition_start(&g->clap_transition, View_getOrthoTop(&g->menu_view));
             g->render = Game_renderRaceWithClap;
         }
@@ -367,7 +367,6 @@ static void Game_updateMapMenu(Game *g) {
         FadeTransition_fadeTo(&g->fade_transition, Game_renderShipMenu);
     }
     if(PLAYERINPUT_PRESSED(p_input, accelerating)) {
-        Mix_PlayChannel(-1, g->snd_clap_close, 0);
         g->update = Game_updatePostMapMenu;
         g->render = Game_renderMapMenuWithClap;
         ClapTransition_start(&g->clap_transition, View_getOrthoTop(&g->menu_view));

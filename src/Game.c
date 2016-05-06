@@ -68,7 +68,7 @@ void Game_deinit(Game *g) {
     Monospace_cleanup();
     Mix_FreeMusic(g->main_music);
     Mix_FreeChunk(g->snd_menu_transition);
-    Mix_FreeChunk(g->snd_clap_close);
+    Mix_FreeChunk(g->clap_transition.snd_clap_close);
 }
 
 static void Game_quit(Game *g) {

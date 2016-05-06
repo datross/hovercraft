@@ -62,6 +62,7 @@ struct ClapTransition {
     Vec2 top_pos, bottom_pos;
     uint32_t time_of_closing;
     void (*update)(ClapTransition *ct, float top);
+    Mix_Chunk *snd_clap_close;
 };
 
 typedef struct {
@@ -122,8 +123,7 @@ struct Game {
     size_t map_data_count;
 #define SOUND_CHANNEL_NBR 10
     Mix_Music *main_music;
-    Mix_Chunk *snd_menu_transition,
-              *snd_clap_close;
+    Mix_Chunk *snd_menu_transition;
               /**snd_count_down_3,
               *snd_count_down_2,
               *snd_count_down_1,

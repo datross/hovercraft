@@ -432,6 +432,6 @@ void Game_loadSounds(Game *g, const char *dirname_music, const char *dirname_snd
         exit(EXIT_FAILURE); \
     } 
     LOAD_SND(g->snd_menu_transition, "menu_transition.wav")
-    LOAD_SND(g->snd_clap_close     , "clap_close.wav")
+    LOAD_SND(g->clap_transition.snd_clap_close     , "clap_close.wav")
     Util_popd();
 }
