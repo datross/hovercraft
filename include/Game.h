@@ -21,7 +21,8 @@ typedef struct {
     unsigned zooming_in    : 1;
     unsigned zooming_out   : 1;
     unsigned escaping      : 1;
-    unsigned reserved      : 2;
+    unsigned pausing       : 1;
+    unsigned reserved      : 1;
 } PlayerInputState;
 
 typedef struct {
@@ -75,7 +76,8 @@ typedef struct {
     PhysicWorld world;
     unsigned ship_count : 2;
     unsigned view_count : 2;
-    unsigned reserved   : 4;
+    unsigned aborted    : 1;
+    unsigned reserved   : 3;
     uint32_t completion_times[MAX_PLAYERS];
     uint32_t time_of_completion;
     uint32_t rankings[MAX_PLAYERS];

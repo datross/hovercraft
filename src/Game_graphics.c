@@ -210,7 +210,10 @@ void Game_renderRace(const Game *g) {
     View_apply(&g->menu_view);
     char str[64];
     if(g->race.time_of_completion) {
-        snprintf(str, sizeof(str), "Player %u won!", g->race.rankings[0]+1);
+        if(g->race.aborted)
+            snprintf(str, sizeof(str), "Aborted");
+        else
+            snprintf(str, sizeof(str), "Player %u won!", g->race.rankings[0]+1);
         Monospace_renderCenteredString(str, .1f);
         return;
     }

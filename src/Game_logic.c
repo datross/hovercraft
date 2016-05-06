@@ -99,11 +99,19 @@ static inline void reactToZoom(Game *g, size_t i) {
         g->race.views[i].zoom *= .9f;
 }
 
+static void Game_updateRace(Game *g);
+
+static void Game_updateDummy(Game *g) {
+    if(PLAYERINPUT_PRESSED(g->input.players[0], pausing))
+        g->update = Game_updateRace;
+}
+
 static void Game_updateRace(Game *g) { 
 
     uint32_t new_ms = SDL_GetTicks();
     g->race.time_ms += new_ms - g->race.step_ms;
     g->race.step_ms = new_ms;
+
 
     if(g->race.time_of_completion) {
         Mix_VolumeMusic(Mix_VolumeMusic(-1)-1);
@@ -114,7 +122,16 @@ static void Game_updateRace(Game *g) {
             ClapTransition_start(&g->clap_transition, View_getOrthoTop(&g->menu_view));
             g->render = Game_renderRaceWithClap;
         }
+    } else if(PLAYERINPUT_PRESSED(g->input.players[0], escaping)) {
+        g->race.time_of_completion = SDL_GetTicks();
+        g->race.aborted = true;
     }
+
+    if(PLAYERINPUT_PRESSED(g->input.players[0], pausing)) {
+        g->update = Game_updateDummy;
+        return;
+    }
+
     Process_physics(&(g->race.world), g->tickrate);
     size_t i;
     for(i=0 ; i<g->race.ship_count ; ++i) {

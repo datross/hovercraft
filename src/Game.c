@@ -93,6 +93,7 @@ void Game_handleEvent(Game *g, const SDL_Event *e) {
         switch(e->key.keysym.sym) {
         case SDLK_ESCAPE: g->input.players[0].now.escaping      = true;
                           g->input.players[1].now.escaping      = true; break;
+        case SDLK_p:      g->input.players[0].now.pausing       = true; break;
         case SDLK_SPACE:  g->input.players[0].now.accelerating  = true; break;
         case SDLK_UP:     g->input.players[0].now.zooming_in    = true; break;
         case SDLK_DOWN:   g->input.players[0].now.zooming_out   = true; break;
@@ -109,6 +110,7 @@ void Game_handleEvent(Game *g, const SDL_Event *e) {
         switch(e->key.keysym.sym) {
         case SDLK_ESCAPE: g->input.players[0].now.escaping      = false;
                           g->input.players[1].now.escaping      = false; break;
+        case SDLK_p:      g->input.players[0].now.pausing       = false; break;
         case SDLK_SPACE:  g->input.players[0].now.accelerating  = false; break;
         case SDLK_UP:     g->input.players[0].now.zooming_in    = false; break;
         case SDLK_DOWN:   g->input.players[0].now.zooming_out   = false; break;
