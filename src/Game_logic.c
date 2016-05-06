@@ -298,13 +298,13 @@ static void Game_updatePreCountdown(Game *g) {
         g->race.ships[i].particle_system_reactor.emit_direction = MakeVec2(cos(g->race.ships[i].physic_solid.rotation),
                                                                             cos(g->race.ships[i].physic_solid.rotation));
         g->race.ships[i].particle_system_reactor.source_speed = MakeVec2(0,0);
-        g->race.ships[i].particle_system_reactor.source_radius_max = 0.02;
+        g->race.ships[i].particle_system_reactor.source_radius_max = 0.17;
         g->race.ships[i].particle_system_reactor.particle_size = REACTOR_PARTICLES_SIZE;
         g->race.ships[i].particle_system_reactor.particle_size_dispersion = 2;
         g->race.ships[i].particle_system_reactor.emit_direction_dispersion = 0.7;
         g->race.ships[i].particle_system_reactor.emit_speed_dispersion = 1.;
-        g->race.ships[i].particle_system_reactor.life_time_max = 210;
-        g->race.ships[i].particle_system_reactor.life_time_dispersion = 1.;
+        g->race.ships[i].particle_system_reactor.life_time_max = 300;
+        g->race.ships[i].particle_system_reactor.life_time_dispersion = 0.6;
         g->race.ships[i].particle_system_reactor.color_dispersion = 0.2;
         g->race.ships[i].particle_system_reactor.dampness = 1;
         ParticleSystem_init_particles(&(g->race.ships[i].particle_system_reactor));

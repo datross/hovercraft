@@ -81,6 +81,7 @@ void Ship_renderBoundingVolumes(const Ship *s) {
     glPopMatrix();
 }
 void Ship_render(const Ship *s) {
+	ParticleSystem_draw_particles(&(s->particle_system_reactor));
     /* Ship_renderBoundingVolumes(s); */
     glPushMatrix();
     {
@@ -89,7 +90,6 @@ void Ship_render(const Ship *s) {
         Sprite_render(&s->data->above[s->above_index][s->palette_index]);
     }
     glPopMatrix();
-    ParticleSystem_draw_particles(&(s->particle_system_reactor));
 }
 void Ship_refreshGuides(Ship *s) {
     size_t i;
