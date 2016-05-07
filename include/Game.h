@@ -152,6 +152,7 @@ void Game_render(const Game *g);
 void Game_updateStartScreen(Game *g);
 /* Celle-là pour Game_graphics.c */
 void Game_updatePaletteSelection(Game *g);
+void Game_updatePaused(Game *g);
 
 void ClapTransition_updateDummy(ClapTransition *ct, float top);
 void FadeTransition_updateDummy(Game *g);

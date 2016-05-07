@@ -49,6 +49,16 @@ void Ship_renderGuides(const Ship *s) {
     int i;
     for(i=s->guide_count-1 ; i>=0 ; --i) {
         const ShipGuide *guide = s->guides + i;
+        glColor3f(1.f, 1.f, 1.f);
+        glPushMatrix(); 
+        {
+            glTranslatef(s->physic_solid.position.x, s->physic_solid.position.y, 0);
+            glRotatef(guide->theta,0,0,1);
+            glTranslatef(0, 1.5f, 0);
+            glScalef(guide->scale.x*1.1f, guide->scale.y*1.1f, 1.f);
+            renderIsocelesTriangle(true);
+        } 
+        glPopMatrix();
         glColor3f(guide->r, guide->g, guide->b);
         glPushMatrix(); 
         {
@@ -59,6 +69,7 @@ void Ship_renderGuides(const Ship *s) {
             renderIsocelesTriangle(true);
         } 
         glPopMatrix();
+
     }
 }
 

@@ -21,6 +21,7 @@ void Sprite_build(Sprite *s, GLuint tex_id, Vec2u rect_pos,
 void Sprite_render(const Sprite *s) {
     glColor3f(1.f, 1.f, 1.f);
     //glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    //glBlendFunc(GL_CONSTANT_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     glEnable(GL_ALPHA_TEST);
     glAlphaFunc(GL_GEQUAL, 1.f);
 
