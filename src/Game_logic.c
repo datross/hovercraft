@@ -100,7 +100,7 @@ static inline void reactToZoom(Game *g, size_t i) {
 }
 
 static void Game_updateRace(Game *g);
-#include <Sprite.h>
+
 void Game_updatePaused(Game *g) {
     if(PLAYERINPUT_PRESSED(g->input.players[0], pausing))
         g->update = Game_updateRace;
@@ -225,7 +225,10 @@ static void Game_updateRace(Game *g) {
             break;
         g->race.views[i].center = s->physic_solid.position;
         //g->views[i].tilt = atan(s->physic_solid.speed.y / s->physic_solid.speed.x);
-        g->race.views[i].tilt = s->physic_solid.rotation-M_PI/2.f;
+        const float old_tilt = g->race.views[i].tilt;
+        const float new_tilt = s->physic_solid.rotation-M_PI/2.f;
+        const float tilt_diff = new_tilt-old_tilt;
+        g->race.views[i].tilt = old_tilt + tilt_diff*0.155f;
         reactToZoom(g, i);
         /* if(i==0)printf("zoom : %f\n", g->views[i].zoom); */
     }
