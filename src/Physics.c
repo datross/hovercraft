@@ -4,13 +4,8 @@
 
 void Circle_init(ConvexShape * shape, Vec2 position, float radius) {
     shape->type = CIRCLE;
-    shape->shape.circle.position = position;
+    shape->position = position;
     shape->shape.circle.radius = radius;
-}
-
-void Shape_init(ConvexShape * shape, Polygon polygon) {
-    shape->type = POLYGON;
-    shape->shape.polygon = polygon;
 }
 
 void ConvexShape_free_content(ConvexShape * shape) {
@@ -41,7 +36,7 @@ void Solid_init(Solid *solid, ConvexShape collision_shapes[],
                 float mass_temp = M_PI * solid->collision_shapes[i].shape.circle.radius;
                 mass += mass_temp;
                 mass_center = AddVec2(mass_center, MulVec2(
-                    solid->collision_shapes[i].shape.circle.position, 
+                    solid->collision_shapes[i].position, 
                     mass_temp));
                     
                 break;
@@ -57,7 +52,7 @@ void Solid_init(Solid *solid, ConvexShape collision_shapes[],
                 }
                 polygon_center = MulVec2(polygon_center, 
                     1. / solid->collision_shapes[i].shape.polygon.nb_vertices);
-                solid->collision_shapes[i].shape.polygon.position = polygon_center;
+                solid->collision_shapes[i].position = polygon_center;
                     
                 /* Parcours de tous les sommets en formant des triangles
                  * autour du centre, pour calculer le barycentre de chaque. */
@@ -80,6 +75,7 @@ void Solid_init(Solid *solid, ConvexShape collision_shapes[],
             }
             default:
                 break;
+            solid->collision_shapes[i].dist_to_center = sqrt(SqrNorm(solid->collision_shapes[i].position));
         }
     }
     mass_center = MulVec2(mass_center, 1. / mass);
@@ -88,8 +84,8 @@ void Solid_init(Solid *solid, ConvexShape collision_shapes[],
     for(i = 0; i < solid->nb_collision_shapes; ++i) {
         switch(solid->collision_shapes[i].type) {
             case CIRCLE: {
-                solid->collision_shapes[i].shape.circle.position = 
-                    SubVec2(solid->collision_shapes[i].shape.circle.position,
+                solid->collision_shapes[i].position = 
+                    SubVec2(solid->collision_shapes[i].position,
                                 mass_center);
                 
                 break;
@@ -101,8 +97,8 @@ void Solid_init(Solid *solid, ConvexShape collision_shapes[],
                         SubVec2(solid->collision_shapes[i].shape.polygon.vertices[j],
                         mass_center);
                 }
-                solid->collision_shapes[i].shape.polygon.position = 
-                        SubVec2(solid->collision_shapes[i].shape.polygon.position,
+                solid->collision_shapes[i].position = 
+                        SubVec2(solid->collision_shapes[i].position,
                         mass_center);
                 break;
             }
@@ -112,6 +108,11 @@ void Solid_init(Solid *solid, ConvexShape collision_shapes[],
     }
     solid->next = NULL;
     solid->prev = NULL;
+    
+    for(unsigned i = 0; i < COLLISION_FORCE_NBR; ++i) {
+        solid->collision_forces[i].solid = solid;
+        solid->collision_forces[i].type = NORMAL;
+    }
 }
 
 void World_clean(PhysicWorld * world) {
@@ -166,58 +167,102 @@ int Collision_point_segment(Vec2 p, Vec2 mv, Vec2 seg1, Vec2 seg2, float *t, Vec
     return 1;
 }
 
-////!\\ Fonction pas finie !
-int ConvexShape_compute_collision(ConvexShape *s1, Vec2 pos1, float r1, Vec2 mov1,
-                                    ConvexShape *s2, Vec2 pos2, float r2, Vec2 mov2,
-                                      Vec2 * pos_collision, float *collision_time_ratio) {
-    //~ /* On se place dans le repère de s2 */
-    //~ Vec2 p1 = SubVec2(pos1, pos2);
-    //~ Vec2 p2 = MakeVec2(0,0);
-    //~ Vec2 m1 = SubVec2(mov1, mov2);
-    //~ Vec2 m2 = MakeVec2(0,0);
-    //~ if(s1->type == CIRCLE && s2->type == CIRCLE) {
-        //~ Vec2 _1_2 = SubVec2(p2, p1);
-        //~ Vec2 _3   = AddVec2(p1, m1);
-        //~ Vec2 _1_3 = SubVec2(_3, p1);
-        //~ float dist_min = fabs(Scal2( _1_2, OrthogonalVec2(_1_3)));
-        //~ if(dist_min >= s1->shape.circle.radius + s2->shape.circle.radius) {
-            //~ return 0;
-        //~ }
-        //~ float a = Scal2(m1, m1),
-              //~ b = 2 * Scal2(m1, p1),
-              //~ c = Scal2(p1, p1) - (s1->shape.circle.radius + s2->shape.circle.radius)
-                                //~ * (s2->shape.circle.radius + s2->shape.circle.radius);
-        //~ float delta = b*b - 4*a*c;
-        //~ if(delta < 0)
-            //~ return 0;
-        //~ float t = (-b - sqrt(delta)) / (2*a);
-        //~ if(t < 0 || t > 1)
-            //~ return 0;
-        //~ *collision_time_ratio = t;
-        //~ *pos_collision = AddVec2(MulVec2(AddVec2(p1, MulVec2(m1, t)), 
-                //~ (s2->shape.circle.radius + s2->shape.circle.radius) /
-                //~ (s2->shape.circle.radius + s2->shape.circle.radius + s1->shape.circle.radius + s2->shape.circle.radius)),
-                            //~ pos2);
-        //~ return 1;
-    //~ } else if(s1->type == POLYGON && s2->type == POLYGON) {
-        //~ /* On parcourt tous les segments de s1 puis s2, en testant une 
-         //~ * collision avec tous les points de l'autre polygone */
-        //~ float t_min = 1, t_current;
-        //~ Vec2  pos_min, pos_current;
-        //~ /*for(unsigned i = 0; i < s1->shape.polygon.nb_vertices; ++i) {
-            //~ unsigned i_plus_1 = (i == s1->shape.polygon.nb_vertices - 1) ? 0 : i + 1;
-            //~ for(unsigned i_point = 0; i_point < s2->shape.polygon.nb_vertices; ++i_point) {
-                //~ if(Collision_point_segment( AddVec2(s2->shape.polygon.vertices[i_point]
-            //~ }
-        //~ }*/      // TODO : finir la fonction
-    //~ } else {
-    //~ 
-    //~ }
+/* Le même que précédente, mais là c'est le segment qui se déplace et pas le point. */
+int Collision_segment_point(Vec2 p, Vec2 seg1, Vec2 seg2, Vec2 mv, float *t, Vec2 * pos) {
+    if(!Collision_point_segment(p, MulVec2(mv, -1), seg1, seg2, t, pos))
+        return 0;
+    *pos = p;
+    return 1;
+}
+
+//int Collision_cercle_segment(Vec2 c, float, r, Vec2 mv, Vec2 seg1, Vec2 seg2, float *t, Vec2 *pos) {
     
-    return 0;
+
+int ConvexShape_compute_collision(ConvexShape *s1, Vec2 pos1, float rot1, Vec2 mov1,
+                                    ConvexShape *s2, Vec2 pos2, float rot2, Vec2 mov2,
+                                      Vec2 * pos_collision, float *collision_time_ratio,
+                                      Vec2 * normal) {
+    /* On se place dans le repère de s2 */
+    Vec2 p1 = GlobalToLocal2(pos1, pos2, rot2);
+    Vec2 m1 = SubVec2(GlobalToLocal2(AddVec2(pos1, mov1), AddVec2(pos2, mov2), rot2), 
+                                        GlobalToLocal2(pos1, pos2, rot2));
+    float r1 = rot1 - rot2;
+    if(s1->type == CIRCLE && s2->type == CIRCLE) {
+        Vec2 _1_2 = MulVec2(p1, -1);
+        Vec2 _3   = AddVec2(p1, m1);
+        Vec2 _1_3 = SubVec2(_3, p1);
+        float dist_min = fabs(Scal2( _1_2, OrthogonalVec2(_1_3)));
+        if(dist_min >= s1->shape.circle.radius + s2->shape.circle.radius) {
+            return 0;
+        }
+        float a = SqrNorm(m1),
+              b = 2 * Scal2(m1, p1),
+              c = SqrNorm(p1) - (s1->shape.circle.radius + s2->shape.circle.radius)
+                                * (s2->shape.circle.radius + s2->shape.circle.radius);
+        float delta = b*b - 4*a*c;
+        if(delta < 0)
+            return 0;
+        float t = (-b - sqrt(delta)) / (2*a);
+        if(t < 0 || t > 1)
+            return 0;
+        *collision_time_ratio = t;
+        Vec2 _2_1_collision = SubVec2(AddVec2(pos1, MulVec2(mov1, *collision_time_ratio)), 
+                                    AddVec2(pos2, MulVec2(mov2, *collision_time_ratio)));
+        *pos_collision = AddVec2( AddVec2(pos2, MulVec2(mov2, *collision_time_ratio)), 
+                    MulVec2(_2_1_collision, s2->shape.circle.radius / (s2->shape.circle.radius + s1->shape.circle.radius)));
+        *normal = MulVec2(_2_1_collision, 1. / sqrt(SqrNorm(_2_1_collision)));
+        return 1;
+    } else if(s1->type == POLYGON && s2->type == POLYGON) {
+        /* On parcourt tous les segments de s1 puis s2, en testant une 
+         * collision avec tous les points de l'autre polygone */
+        float t_current;
+        Vec2  pos_current;
+        *collision_time_ratio = 1.;
+        for(unsigned i = 0; i < s1->shape.polygon.nb_vertices; ++i) {
+            unsigned i_plus_1 = (i == s1->shape.polygon.nb_vertices - 1) ? 0 : i + 1;
+            for(unsigned i_point = 0; i_point < s2->shape.polygon.nb_vertices; ++i_point) {
+                if(Collision_segment_point(s2->shape.polygon.vertices[i_point], 
+                        LocalToGlobal2(s1->shape.polygon.vertices[i], p1, r1),
+                        LocalToGlobal2(s1->shape.polygon.vertices[i_plus_1], p1, r1),
+                        m1,
+                        &t_current,
+                        &pos_current)) {
+                    if(t_current < *collision_time_ratio) {
+                        *pos_collision = pos_current;
+                        *normal = OrthogonalVec2(SubVec2(LocalToGlobal2(s1->shape.polygon.vertices[i], p1, r1),
+                                                         LocalToGlobal2(s1->shape.polygon.vertices[i_plus_1], p1, r1)));
+                        *normal = MulVec2(*normal, 1. / sqrt(SqrNorm(*normal)));
+                    }
+                }
+            }
+        }
+        for(unsigned i = 0; i < s2->shape.polygon.nb_vertices; ++i) {
+            unsigned i_plus_1 = (i == s2->shape.polygon.nb_vertices - 1) ? 0 : i + 1;
+            for(unsigned i_point = 0; i_point < s1->shape.polygon.nb_vertices; ++i_point) {
+                if(Collision_point_segment(LocalToGlobal2(s1->shape.polygon.vertices[i_point], p1, r1), 
+                        m1,
+                        s2->shape.polygon.vertices[i],
+                        s2->shape.polygon.vertices[i_plus_1],
+                        &t_current,
+                        &pos_current)) {
+                    if(t_current < *collision_time_ratio) {
+                        *pos_collision = pos_current;
+                        *normal = OrthogonalVec2(SubVec2(s2->shape.polygon.vertices[i],
+                                                         s2->shape.polygon.vertices[i_plus_1]));
+                        *normal = MulVec2(*normal, 1. / sqrt(SqrNorm(*normal)));
+                    }
+                }
+            }
+        }
+        return *collision_time_ratio < 1.;
+    } else {
+        return 0;
+    }
 }
 
 void Compute_force(Solid * solid, Force * force) {
+    
+    // TODO
     return;
 }
 
@@ -245,15 +290,59 @@ int Process_physics(PhysicWorld * world, float elapsed_time) {
     world->forces_tail = NULL;
     world->forces_head = NULL;
     
-    /* Gestion des collisions blabla. */
     
+    /* Gestion des collisions */
+    Vec2 normal = MakeVec2(0,0), pos_collision;
+    float collision_time_ratio = 0;
+    for(Solid * current_solid = world->solids; current_solid != NULL; current_solid = current_solid->next) {
+        unsigned force_to_apply_nbr = 0;
+        for(unsigned i_shape = 0; i_shape < current_solid->nb_collision_shapes && force_to_apply_nbr < COLLISION_FORCE_NBR; ++i_shape) {
+            /* Mouvement de la shape */
+            Vec2 speed_shape = AddVec2(current_solid->speed, 
+                MakeVec2(-current_solid->collision_shapes[i_shape].dist_to_center 
+                         * current_solid->rotation_speed * sin(current_solid->rotation), 
+                         current_solid->collision_shapes[i_shape].dist_to_center 
+                         * current_solid->rotation_speed * cos(current_solid->rotation)));
+            Vec2 position_shape = LocalToGlobal2(current_solid->collision_shapes[i_shape].position,
+                    current_solid->position, current_solid->rotation);
+            
+            /* Parcourt de tous les obstacles. */
+            for(Obstacle * current_obstacle = world->obstacles; 
+                    current_obstacle && force_to_apply_nbr < COLLISION_FORCE_NBR; current_obstacle = current_obstacle->next) {
+                if(ConvexShape_compute_collision(
+                            &(current_solid->collision_shapes[i_shape]), 
+                            position_shape, 
+                            current_solid->rotation,    
+                            speed_shape,
+                            &(current_obstacle->shape), 
+                            current_obstacle->position,
+                            current_obstacle->rotation, 
+                            MakeVec2(0,0),
+                            &pos_collision, 
+                            &collision_time_ratio, 
+                            &normal)) {
+                    current_solid->collision_forces[force_to_apply_nbr].position = GlobalToLocal2(pos_collision, 
+                                          current_solid->position,
+                                          current_solid->rotation);
+                    current_solid->collision_forces[force_to_apply_nbr].force = normal;
+                    current_solid->collision_forces[force_to_apply_nbr].next = NULL;
+                    Compute_force(current_solid,
+                            &(current_solid->collision_forces[force_to_apply_nbr]));
+                    ++force_to_apply_nbr;
+                }
+            }
+        }
+        /* Ajout des forces à appliquer sur le solide. */
+        for(unsigned i = 0; i < force_to_apply_nbr; ++i) {
+            World_addForce(world, &(current_solid->collision_forces[i]));
+        }
+    } 
     
     /* Mise à jour des positions et rotations. */
 	Solid *tmp = world->solids;
     for(; tmp; tmp = tmp->next) {
         tmp->position = AddVec2(tmp->position,
                                             tmp->speed);
-                                            
         tmp->rotation += tmp->rotation_speed;
     }
     

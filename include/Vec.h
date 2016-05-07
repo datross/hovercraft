@@ -12,11 +12,14 @@ Vec2 AddVec2(Vec2 a, Vec2 b);
 Vec2 SubVec2(Vec2 a , Vec2 b);
 Vec2 MulVec2(Vec2 a, float coeff);
 float Scal2(Vec2 u, Vec2 v);
+float SqrNorm(Vec2 u);
 float PseudoVectProd2(Vec2 a, Vec2 b);
 Vec2 OrthogonalVec2(Vec2 a);
 Vec2 Rotate2(Vec2 u, float angle); /* radians */
 
 /* Fonctions de passage d'une base locale à celle globale et inversement */
 Vec2 LocalToGlobal2(Vec2 local_position, Vec2 base_position, float base_angle);
+/* L'inverse */
+Vec2 GlobalToLocal2(Vec2 global_position, Vec2 base_position, float base_angle);
 
 #endif /* VEC_H */

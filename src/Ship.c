@@ -20,7 +20,7 @@ void Ship_init(Ship *s) {
     polygon.vertices[3] = MakeVec2(0, 1);
     
     ConvexShape shape;
-    Shape_init(&shape, polygon);
+    shape.type = POLYGON;
     
     Solid_init(&(s->physic_solid), &shape, 1, 1, 1);
 

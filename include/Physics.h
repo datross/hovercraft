@@ -4,6 +4,8 @@
 #include <Vec.h>
 #include <math.h>
 
+#define COLLISION_FORCE_NBR 10
+
 /* Structures géométriques de base */
 
 typedef enum {
@@ -11,12 +13,10 @@ typedef enum {
 } ConvexShapeType;
 
 typedef struct {
-    Vec2  position;
     float radius;
 } Circle;
 
 typedef struct { 
-    Vec2     position;
     Vec2     *vertices;
     unsigned nb_vertices;
 } Polygon; /* Les coordonnées des sommets sont
@@ -24,6 +24,8 @@ typedef struct {
 
 typedef struct {
     ConvexShapeType type;
+    Vec2 position;
+    float dist_to_center;
     union {
         Circle  circle;
         Polygon polygon;
@@ -38,6 +40,22 @@ typedef struct Obstacle {
     char visited; /* Si la collision est déjà testée. */
     struct Obstacle * next;
 } Obstacle;
+
+typedef enum {
+    NORMAL, COUPLE
+} ForceType;
+
+struct Solid;
+
+typedef struct Force {
+    ForceType    type; /* Si c'est un couple, sa valeur est force.x. */
+    struct Solid        *solid; /* Solide sur lequel s'applique la force */
+    Vec2         position; /* Point d'application de la force sur le solide 
+                      (dans le repère local) */
+    Vec2         force; /* Vecteur de la force (repère global) */
+    struct Force *next; /* Le monde contient une file (chaînée) des 
+                          * forces à appliquer. */
+} Force;
 
 /* Solides physiques */
 /* NOTE : les coordonnées dans un solide sont toutes dans le 
@@ -56,23 +74,11 @@ typedef struct Solid {
     float       rotation_speed;
 
     struct Solid * next, * prev;
+    
+    Force collision_forces[COLLISION_FORCE_NBR];
 } Solid;
 
 /* Monde physique */
-
-typedef enum {
-    NORMAL, COUPLE
-} ForceType;
-
-typedef struct Force {
-    ForceType    type; /* Si c'est un couple, sa valeur est force.x. */
-    Solid        *solid; /* Solide sur lequel s'applique la force */
-    Vec2         position; /* Point d'application de la force sur le solide 
-                      (dans le repère local) */
-    Vec2         force; /* Vecteur de la force (repère global) */
-    struct Force *next; /* Le monde contient une file (chaînée) des 
-                          * forces à appliquer. */
-} Force;
 
 /* PAS POUR LE MOMENT */
 /*typedef struct {
@@ -86,7 +92,7 @@ typedef struct {
 
 typedef struct {
     Obstacle *obstacles; /* File de tous les obstacles du monde */
-    Solid *solids; /* File de tous les objets du monde */
+    Solid *solids; /* Liste doubement chaînée de tous les objets (dynamiques) du monde */
     /* File des forces à appliquer */
     Force *forces_head, *forces_tail; /* head pointe vers le début
                                          * et tail vers la fin (là où on
@@ -101,7 +107,6 @@ typedef struct {
 void ConvexShape_free_content(ConvexShape * shape); /* Libère les sommets du polygones
                                                        si il y en a. */
 void Circle_init(ConvexShape * shape, Vec2 position, float radius);
-void Shape_init(ConvexShape * shape, Polygon polygon);
 void Solid_init(Solid *solid, ConvexShape collision_shapes[], 
                                         unsigned nb_collision_shapes,
                                         float inertia_moment,
@@ -116,12 +121,14 @@ void World_addObstacle(PhysicWorld * world, Obstacle * obs);
  * que contiennent les ConvexShape) et mouvement de la forme.
  * Si collision, pos_collision contient la position (repère global) de la 
  * collision, et collision_time_ratio indique quand pendant le mouvement 
- * la collision a lieu (donc €[0,1]). */
+ * la collision a lieu (donc €[0,1]). normal est le vecteur unitaire
+ * de direction la force qu'il faudra exercer, c'est la force qu'exerce
+ * s2 sur s1. */
 int ConvexShape_compute_collision(ConvexShape *s1, Vec2 p1, float r1, Vec2 m1,
                                     ConvexShape *s2, Vec2 p2, float r2, Vec2 m2,
-                                      Vec2 * pos_collision, float *collision_time_ratio);
-/* Calcule la force qu'exerce un solide en un point,
- * de part sa vitesse et sa rotation. */
+                                      Vec2 * pos_collision, float *collision_time_ratio,
+                                      Vec2 * normal);
+/* Modifie la norme de force->force pour stopper le solide. */
 void Compute_force(Solid * solid, Force * force);
 
 /* Applique une force. */

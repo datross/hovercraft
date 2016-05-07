@@ -260,7 +260,7 @@ void Parser_deinit(Parser *p) {
             } else if(!strcmp(type, "circle")) { \
                 current_wall->physic_obstacle.shape.type = CIRCLE; \
                 PARSER_SSCANF(1, parser, "%f", &(current_wall->physic_obstacle.shape.shape.circle.radius)); \
-                current_wall->physic_obstacle.shape.shape.circle.position = MakeVec2(0,0); \
+                current_wall->physic_obstacle.shape.position = MakeVec2(0,0); \
             } else { \
                 fprintf(stderr, "Erreur de type d'obstacle.\n"); \
                 exit(EXIT_FAILURE); \
