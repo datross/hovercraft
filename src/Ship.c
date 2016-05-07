@@ -19,11 +19,11 @@ void Ship_init(Ship *s) {
     polygon.vertices[2] = MakeVec2(2, 1);
     polygon.vertices[3] = MakeVec2(0, 1);
     
-    ConvexShape shape;
-    shape.type = POLYGON;
-    shape.shape.polygon = polygon;
+    ConvexShape * shape = malloc(sizeof(ConvexShape));
+    shape->type = POLYGON;
+    shape->shape.polygon = polygon;
     
-    Solid_init(&(s->physic_solid), &shape, 1, 1, 1);
+    Solid_init(&(s->physic_solid), shape, 1, 1, 1);
 
 	s->physic_solid.rotation = M_PI / 2.;
 
@@ -43,6 +43,7 @@ void Ship_init(Ship *s) {
 
 void Ship_deinit(Ship *s) {
     free(s->physic_solid.collision_shapes[0].shape.polygon.vertices);
+    free(s->physic_solid.collision_shapes);
     ParticleSystem_free_particles(&(s->particle_system_reactor));
 }
 
