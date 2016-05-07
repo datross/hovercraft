@@ -13,7 +13,7 @@ void ConvexShape_free_content(ConvexShape * shape) {
         free(shape->shape.polygon.vertices);
 }
 
-void Solid_init(Solid *solid, ConvexShape collision_shapes[], 
+void Solid_init(Solid *solid, ConvexShape *collision_shapes, 
                                         unsigned nb_collision_shapes,
                                         float inertia_moment,
                                         float total_mass) {
