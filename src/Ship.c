@@ -21,6 +21,7 @@ void Ship_init(Ship *s) {
     
     ConvexShape shape;
     shape.type = POLYGON;
+    shape.shape.polygon = polygon;
     
     Solid_init(&(s->physic_solid), &shape, 1, 1, 1);
 

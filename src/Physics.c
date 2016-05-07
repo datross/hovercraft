@@ -43,7 +43,7 @@ void Solid_init(Solid *solid, ConvexShape collision_shapes[],
             }
             case POLYGON: {
                 /* Calcul intermédiaire du centre du polygone. */
-                Vec2 polygon_center;
+                Vec2 polygon_center = MakeVec2(0,0);
                 unsigned vertex;
                 for(vertex = 0; vertex < solid->collision_shapes[i].shape.polygon.nb_vertices;
                                                                                 ++vertex) {
