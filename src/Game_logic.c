@@ -100,8 +100,8 @@ static inline void reactToZoom(Game *g, size_t i) {
 }
 
 static void Game_updateRace(Game *g);
-
-static void Game_updateDummy(Game *g) {
+#include <Sprite.h>
+void Game_updatePaused(Game *g) {
     if(PLAYERINPUT_PRESSED(g->input.players[0], pausing))
         g->update = Game_updateRace;
 }
@@ -115,6 +115,8 @@ static void Game_updateRace(Game *g) {
 
     if(g->race.time_of_completion) {
         Mix_VolumeMusic(Mix_VolumeMusic(-1)-1);
+        if(Mix_VolumeMusic(-1) <= 0)
+            Mix_RewindMusic();
         if(g->clap_transition.update == ClapTransition_updateStayClosed) {
             g->update = Game_updatePostRace;
         } else if(new_ms-g->race.time_of_completion > 2400 
@@ -128,7 +130,7 @@ static void Game_updateRace(Game *g) {
     }
 
     if(PLAYERINPUT_PRESSED(g->input.players[0], pausing)) {
-        g->update = Game_updateDummy;
+        g->update = Game_updatePaused;
         return;
     }
 
@@ -263,8 +265,8 @@ static void Game_updateCountdown(Game *g) {
     }
     if(ms_left <= 0) {
         puts("Go!!!");
-        Mix_VolumeMusic(MIX_MAX_VOLUME);
-        Mix_PlayMusic(g->race.map.data->music, -1);
+        //Mix_VolumeMusic(MIX_MAX_VOLUME);
+        //Mix_PlayMusic(g->race.map.data->music, -1);
         g->update = Game_updateRace;
         g->update(g);
         return;
@@ -278,11 +280,14 @@ static void Game_updateCountdown(Game *g) {
 static void Game_updatePreCountdown(Game *g) {
     g->race.view_count = g->player_count;
     g->race.ship_count = g->player_count;
+    g->race.aborted = false;
     Game_resizeViewports(g);
     g->race.world.solids       = NULL;
     g->race.world.forces_head  = NULL;
     g->race.world.forces_tail  = NULL;
     g->race.map.data = g->map_data + g->map_menu.selected_map_index;
+    Mix_VolumeMusic(MIX_MAX_VOLUME);
+    Mix_PlayMusic(g->race.map.data->music, -1);
     for(unsigned i = 0; i < g->race.map.data->wall_count; ++i) {
         World_addObstacle(&(g->race.world), &(g->race.map.data->walls[i].physic_obstacle));
     }
@@ -360,6 +365,8 @@ static void Game_updatePostMapMenu(Game *g) {
         Mix_HaltMusic();
     }
     Mix_VolumeMusic(Mix_VolumeMusic(-1)-1);
+    if(Mix_VolumeMusic(-1) <= 0)
+        Mix_RewindMusic();
 }
 static void Game_updateShipMenu(Game *g);
 static void Game_updateMapMenu(Game *g) {

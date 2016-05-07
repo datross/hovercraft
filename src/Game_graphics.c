@@ -209,6 +209,11 @@ void Game_renderRace(const Game *g) {
 
     View_apply(&g->menu_view);
     char str[64];
+    if(g->update == Game_updatePaused) {
+        snprintf(str, sizeof(str), "Paused");
+        Monospace_renderCenteredString(str, .2f);
+        return;
+    }
     if(g->race.time_of_completion) {
         if(g->race.aborted)
             snprintf(str, sizeof(str), "Aborted");
