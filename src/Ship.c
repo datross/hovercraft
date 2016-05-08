@@ -62,7 +62,7 @@ void Ship_init(Ship *s) {
 
 void Ship_deinit(Ship *s) {
     for(unsigned i = 0; i < s->physic_solid.nb_collision_shapes; ++i) {
-        free(s->physic_solid.collision_shapes[0].shape.polygon.vertices);
+        free(s->physic_solid.collision_shapes[i].shape.polygon.vertices);
     }
     free(s->physic_solid.collision_shapes);
     ParticleSystem_free_particles(&(s->particle_system_reactor));
