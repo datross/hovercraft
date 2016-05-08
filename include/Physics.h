@@ -80,16 +80,6 @@ typedef struct Solid {
 
 /* Monde physique */
 
-/* PAS POUR LE MOMENT */
-/*typedef struct {
-    Obstacle ** obstacles;
-    unsigned nb_obstacles;
-} Cell;
-typedef struct {
-    Cell ** grid;
-    unsigned w, h;
-} Grid;*/
-
 typedef struct {
     Obstacle *obstacles; /* File de tous les obstacles du monde */
     Solid *solids; /* Liste doubement chaînée de tous les objets (dynamiques) du monde */
@@ -117,8 +107,7 @@ void World_addSolid(PhysicWorld * world, Solid * solid);
 void World_addObstacle(PhysicWorld * world, Obstacle * obs);
 
 /* Retourne 1 si collision, 0 sinon.
- * p1, r1 et m1 sont les positions, rotations (on tient compte des positions
- * que contiennent les ConvexShape) et mouvement de la forme.
+ * p1, r1 et m1 sont les positions, rotations et mouvement de la forme.
  * Si collision, pos_collision contient la position (repère global) de la 
  * collision, et collision_time_ratio indique quand pendant le mouvement 
  * la collision a lieu (donc €[0,1]). normal est le vecteur unitaire
