@@ -4,26 +4,45 @@
 #include <Ship.h>
 #include <Utils.h>
 
+#define SIZE_COLLISION_SHAPES 0.2
+
 void Ship_init(Ship *s) {
     /* Dès ici, c'est safe de se référer au ShipData pour choisir la shape
      * de collision. Surtout ce champs :
      *     s->data.above[0][0].half_size
      * Qui donne la moitié de la taille du quad texturé en coordonnées monde.
      */ 
-    /* Temporaire */
-    Polygon polygon;
-    polygon.nb_vertices = 4;
-    polygon.vertices = malloc(polygon.nb_vertices * sizeof(Vec2));
-    polygon.vertices[0] = MakeVec2(0, 0);
-    polygon.vertices[1] = MakeVec2(2, 0);
-    polygon.vertices[2] = MakeVec2(2, 1);
-    polygon.vertices[3] = MakeVec2(0, 1);
-    
-    ConvexShape * shape = malloc(sizeof(ConvexShape));
-    shape->type = POLYGON;
-    shape->shape.polygon = polygon;
-    
-    Solid_init(&(s->physic_solid), shape, 1, 1, 1);
+    Vec2u nb_shapes;
+    nb_shapes.x = 2. * s->data->above[0][0].half_size.x / SIZE_COLLISION_SHAPES;
+    nb_shapes.y = 2. * s->data->above[0][0].half_size.y / SIZE_COLLISION_SHAPES;
+    Vec2 size_shapes = MakeVec2(2. * s->data->above[0][0].half_size.x / (float)nb_shapes.x,
+                                2. * s->data->above[0][0].half_size.y / (float)nb_shapes.y);
+    ConvexShape * shape = malloc(nb_shapes.x * nb_shapes.y * sizeof(ConvexShape));
+    if(!shape) {
+        fprintf(stderr, "Erreur allocation boites des collision.\n");
+        exit(EXIT_FAILURE);
+    }
+    unsigned i_shape = 0;
+    for(unsigned x = 0; x < nb_shapes.x; ++x) {
+        for(unsigned y = 0; y < nb_shapes.y; ++y) {
+            Polygon polygon;
+            polygon.nb_vertices = 4;
+            polygon.vertices = malloc(polygon.nb_vertices * sizeof(Vec2));
+            polygon.vertices[0] = MakeVec2(-s->data->above[0][0].half_size.x + x * size_shapes.x, 
+                                           -s->data->above[0][0].half_size.y + y * size_shapes.y);
+            polygon.vertices[1] = MakeVec2(-s->data->above[0][0].half_size.x + (x+1) * size_shapes.x, 
+                                           -s->data->above[0][0].half_size.y + y * size_shapes.y);
+            polygon.vertices[2] = MakeVec2(-s->data->above[0][0].half_size.x + (x+1) * size_shapes.x, 
+                                           -s->data->above[0][0].half_size.y + (y+1) * size_shapes.y);
+            polygon.vertices[3] = MakeVec2(-s->data->above[0][0].half_size.x + x * size_shapes.x, 
+                                           -s->data->above[0][0].half_size.y + (y+1) * size_shapes.y);
+            
+            shape[i_shape].type = POLYGON;
+            shape[i_shape].shape.polygon = polygon;
+            ++i_shape;
+        }
+    }
+    Solid_init(&(s->physic_solid), shape, i_shape, 1, 1);
 
 	s->physic_solid.rotation = M_PI / 2.;
 
@@ -42,7 +61,9 @@ void Ship_init(Ship *s) {
 }
 
 void Ship_deinit(Ship *s) {
-    free(s->physic_solid.collision_shapes[0].shape.polygon.vertices);
+    for(unsigned i = 0; i < s->physic_solid.nb_collision_shapes; ++i) {
+        free(s->physic_solid.collision_shapes[0].shape.polygon.vertices);
+    }
     free(s->physic_solid.collision_shapes);
     ParticleSystem_free_particles(&(s->particle_system_reactor));
 }
@@ -101,6 +122,16 @@ void Ship_render(const Ship *s) {
         glTranslatef(s->physic_solid.position.x, s->physic_solid.position.y, 0);
         glRotatef(degf(s->physic_solid.rotation-M_PI/2.f),0,0,1);
         Sprite_render(&s->data->above[s->above_index][s->palette_index]);
+        
+        /* Provisoire */
+        for(unsigned i = 0; i < s->physic_solid.nb_collision_shapes; ++i) {
+            glBegin(GL_LINE_LOOP);
+            for(unsigned j = 0; j < s->physic_solid.collision_shapes[i].shape.polygon.nb_vertices; ++j) {
+                glVertex2f(s->physic_solid.collision_shapes[i].shape.polygon.vertices[j].x,
+                           s->physic_solid.collision_shapes[i].shape.polygon.vertices[j].y);
+            }
+            glEnd();
+        }
     }
     glPopMatrix();
 }

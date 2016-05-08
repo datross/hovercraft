@@ -299,11 +299,6 @@ static void Game_updatePreCountdown(Game *g) {
     for(i=0 ; i<g->race.ship_count ; ++i) {
         g->race.rankings[i] = 0;
         g->race.completion_times[i] = 0;
-        Ship_init(g->race.ships + i);
-        World_addSolid(&(g->race.world), &(g->race.ships[i].physic_solid)); 
-        g->race.ships[i].physic_solid.position.x = g->race.map.data->start[i].pos.x;
-        g->race.ships[i].physic_solid.position.y = g->race.map.data->start[i].pos.y;
-        g->race.ships[i].physic_solid.rotation = radf(g->race.map.data->start[i].tilt);
         g->race.ships[i].data = g->ship_data + g->ship_menu.selected_ship_index[i];
         g->race.ships[i].palette_index = g->ship_menu.selected_pal_index[i];
         g->race.ships[i].above_index = 1;
@@ -315,6 +310,11 @@ static void Game_updatePreCountdown(Game *g) {
         g->race.ships[i].guides[0].r = 0;
         g->race.ships[i].guides[0].g = 0;
         g->race.ships[i].guides[0].b = 0;
+        Ship_init(g->race.ships + i);
+        World_addSolid(&(g->race.world), &(g->race.ships[i].physic_solid)); 
+        g->race.ships[i].physic_solid.position.x = g->race.map.data->start[i].pos.x;
+        g->race.ships[i].physic_solid.position.y = g->race.map.data->start[i].pos.y;
+        g->race.ships[i].physic_solid.rotation = radf(g->race.map.data->start[i].tilt);
         g->race.ships[i].particle_system_reactor.particle_color.r = 1.0;
         g->race.ships[i].particle_system_reactor.particle_color.g = 1.0;
         g->race.ships[i].particle_system_reactor.particle_color.b = 0.8;

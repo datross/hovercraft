@@ -129,7 +129,7 @@ int ConvexShape_compute_collision(ConvexShape *s1, Vec2 p1, float r1, Vec2 m1,
                                       Vec2 * pos_collision, float *collision_time_ratio,
                                       Vec2 * normal);
 /* Modifie la norme de force->force pour stopper le solide. */
-void Compute_force(Solid * solid, Force * force);
+void Compute_force(Solid * solid, Force * force, float duration);
 
 /* Applique une force. */
 void Apply_force(Force * force, float duration);

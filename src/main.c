@@ -44,6 +44,14 @@ int main(int argc, char* argv[]) {
 
     SDL_WM_SetCaption("Hovercraft", NULL);
     
+    ////////////
+    /*Vec2 a = MakeVec2(0,0);
+    float t = 0;
+    printf("%d\n", Collision_point_segment(MakeVec2(0,1),MakeVec2(1,-1),MakeVec2(0,0),MakeVec2(1,1),&t, &a));
+    printf("%f %f t : %f\n", a.x, a.y, t);
+    exit(1);*/
+    ////////////
+    
     glClearColor(0.f, 0.f, 0.f, 1.f);
     for(game.quit=false ; !game.quit ; ) {
         Uint32 startTime = SDL_GetTicks();

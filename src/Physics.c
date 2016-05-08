@@ -228,10 +228,12 @@ int ConvexShape_compute_collision(ConvexShape *s1, Vec2 pos1, float rot1, Vec2 m
                         &t_current,
                         &pos_current)) {
                     if(t_current < *collision_time_ratio) {
+                        *collision_time_ratio = t_current;
                         *pos_collision = pos_current;
                         *normal = OrthogonalVec2(SubVec2(LocalToGlobal2(s1->shape.polygon.vertices[i], p1, r1),
                                                          LocalToGlobal2(s1->shape.polygon.vertices[i_plus_1], p1, r1)));
                         *normal = MulVec2(*normal, 1. / sqrt(SqrNorm(*normal)));
+                        printf("%f %f\n", normal->x, normal->y);
                     }
                 }
             }
@@ -246,10 +248,12 @@ int ConvexShape_compute_collision(ConvexShape *s1, Vec2 pos1, float rot1, Vec2 m
                         &t_current,
                         &pos_current)) {
                     if(t_current < *collision_time_ratio) {
+                        *collision_time_ratio = t_current;
                         *pos_collision = pos_current;
                         *normal = OrthogonalVec2(SubVec2(s2->shape.polygon.vertices[i],
                                                          s2->shape.polygon.vertices[i_plus_1]));
                         *normal = MulVec2(*normal, 1. / sqrt(SqrNorm(*normal)));
+                        printf("%f %f\n", normal->x, normal->y);
                     }
                 }
             }
@@ -260,9 +264,28 @@ int ConvexShape_compute_collision(ConvexShape *s1, Vec2 pos1, float rot1, Vec2 m
     }
 }
 
-void Compute_force(Solid * solid, Force * force) {
+void Compute_force(Solid * solid, Force * force, float duration) {
+    float coeff_rebond = 0, f = 0;
     
-    // TODO
+    Vec2 r = SubVec2(LocalToGlobal2(force->position, solid->position, solid->rotation),
+                                         solid->position);
+    Vec2 u = OrthogonalVec2(r);
+    float nu = sqrt(SqrNorm(u));
+    if(nu != 0)
+        u = MulVec2(u, 1. / sqrt(SqrNorm(u)));
+    float temp_1 = coeff_rebond - Scal2(solid->speed, force->force)
+                - sqrt(SqrNorm(force->position)) * solid->rotation_speed
+                * Scal2(u, force->force);
+    float temp_2 = duration * ( (1 / solid->mass) +  PseudoVectProd2(r, force->force)
+                                        / solid->inertia_moment);
+    if(temp_2 != 0)
+        f = temp_1 / temp_2;
+    
+    if(f < 0)
+        f = 0;
+        
+    force->force = MulVec2(force->force, f);
+    
     return;
 }
 
@@ -327,8 +350,11 @@ int Process_physics(PhysicWorld * world, float elapsed_time) {
                     current_solid->collision_forces[force_to_apply_nbr].force = normal;
                     current_solid->collision_forces[force_to_apply_nbr].next = NULL;
                     Compute_force(current_solid,
-                            &(current_solid->collision_forces[force_to_apply_nbr]));
+                            &(current_solid->collision_forces[force_to_apply_nbr]), elapsed_time);
                     ++force_to_apply_nbr;
+                    
+                    printf("%f %f\n", current_solid->collision_forces[force_to_apply_nbr].force.x,
+                                      current_solid->collision_forces[force_to_apply_nbr].force.y);
                 }
             }
         }
