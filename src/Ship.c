@@ -65,6 +65,8 @@ void Ship_deinit(Ship *s) {
         free(s->physic_solid.collision_shapes[i].shape.polygon.vertices);
     }
     free(s->physic_solid.collision_shapes);
+    s->physic_solid.collision_shapes = NULL;
+    s->physic_solid.nb_collision_shapes = 0;
     ParticleSystem_free_particles(&(s->particle_system_reactor));
 }
 
