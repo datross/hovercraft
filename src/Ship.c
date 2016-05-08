@@ -117,7 +117,8 @@ void Ship_renderBoundingVolumes(const Ship *s) {
     glPopMatrix();
 }
 void Ship_render(const Ship *s) {
-	ParticleSystem_draw_particles(&(s->particle_system_reactor));
+    if(s->physic_solid.speed.x || s->physic_solid.speed.y)
+    	ParticleSystem_draw_particles(&(s->particle_system_reactor));
     /* Ship_renderBoundingVolumes(s); */
     glPushMatrix();
     {
@@ -125,7 +126,7 @@ void Ship_render(const Ship *s) {
         glRotatef(degf(s->physic_solid.rotation-M_PI/2.f),0,0,1);
         Sprite_render(&s->data->above[s->above_index][s->palette_index]);
         
-        /* Provisoire */
+        /*
         for(unsigned i = 0; i < s->physic_solid.nb_collision_shapes; ++i) {
             glBegin(GL_LINE_LOOP);
             for(unsigned j = 0; j < s->physic_solid.collision_shapes[i].shape.polygon.nb_vertices; ++j) {
@@ -134,6 +135,7 @@ void Ship_render(const Ship *s) {
             }
             glEnd();
         }
+        */
     }
     glPopMatrix();
 }

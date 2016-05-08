@@ -190,11 +190,11 @@ static void Game_renderRaceView(const Game *g, size_t view_index) {
     gui_view.viewport_pos = v->viewport_pos;
     gui_view.viewport_size = v->viewport_size;
     char str[16];
-    snprintf(str, sizeof(str), "speed: %.6f", 
-            sqrtf(
+    snprintf(str, sizeof(str), "speed: %4u", 
+            (unsigned)(1000.f*sqrtf(
                 g->race.ships[view_index].physic_solid.speed.x*g->race.ships[view_index].physic_solid.speed.x
               + g->race.ships[view_index].physic_solid.speed.y*g->race.ships[view_index].physic_solid.speed.y
-            ));
+            )));
     View_apply(&gui_view);
     glPushMatrix();
     glTranslatef(.8f-Monospace_getStringWidth(str, .1f)*.5f, -View_getOrthoTop(&gui_view)+.1f, 0.f);
