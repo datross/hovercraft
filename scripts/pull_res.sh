@@ -8,6 +8,7 @@ user hovercraft
 passive
 prompt
 binary
+newer COPYRIGHTS.txt
 newer menus/menus.txt
 newer menus/menus.png
 newer menus/main_menu_music.mp3
