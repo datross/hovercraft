@@ -174,8 +174,6 @@ int Collision_segment_point(Vec2 p, Vec2 seg1, Vec2 seg2, Vec2 mv, float *t, Vec
     *pos = p;
     return 1;
 }
-
-//int Collision_cercle_segment(Vec2 c, float, r, Vec2 mv, Vec2 seg1, Vec2 seg2, float *t, Vec2 *pos) {
     
 
 int ConvexShape_compute_collision(ConvexShape *s1, Vec2 pos1, float rot1, Vec2 mov1,
