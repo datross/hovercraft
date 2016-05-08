@@ -134,8 +134,8 @@ void Ship_render(const Ship *s) {
                            s->physic_solid.collision_shapes[i].shape.polygon.vertices[j].y);
             }
             glEnd();
-        }
-        */
+        }*/
+        
     }
     glPopMatrix();
 }

@@ -231,7 +231,7 @@ int ConvexShape_compute_collision(ConvexShape *s1, Vec2 pos1, float rot1, Vec2 m
                         *normal = OrthogonalVec2(SubVec2(LocalToGlobal2(s1->shape.polygon.vertices[i], p1, r1),
                                                          LocalToGlobal2(s1->shape.polygon.vertices[i_plus_1], p1, r1)));
                         *normal = MulVec2(*normal, 1. / sqrt(SqrNorm(*normal)));
-                        printf("%f %f\n", normal->x, normal->y);
+                        /*printf("%f %f\n", normal->x, normal->y);*/
                     }
                 }
             }
@@ -251,7 +251,7 @@ int ConvexShape_compute_collision(ConvexShape *s1, Vec2 pos1, float rot1, Vec2 m
                         *normal = OrthogonalVec2(SubVec2(s2->shape.polygon.vertices[i],
                                                          s2->shape.polygon.vertices[i_plus_1]));
                         *normal = MulVec2(*normal, 1. / sqrt(SqrNorm(*normal)));
-                        printf("%f %f\n", normal->x, normal->y);
+                        /*printf("%f %f\n", normal->x, normal->y);*/
                     }
                 }
             }
@@ -283,7 +283,7 @@ void Compute_force(Solid * solid, Force * force, float duration) {
         f = 0;
         
     /* Pour compenser les autres dysfonctionnements, ça rend le jeu jouable */
-    f = 0.001;
+    /*f = 0.001;*/
         
     force->force = MulVec2(force->force, f);
     
@@ -354,8 +354,8 @@ int Process_physics(PhysicWorld * world, float elapsed_time) {
                             &(current_solid->collision_forces[force_to_apply_nbr]), elapsed_time);
                     ++force_to_apply_nbr;
                     
-                    printf("%f %f\n", current_solid->collision_forces[force_to_apply_nbr].force.x,
-                                      current_solid->collision_forces[force_to_apply_nbr].force.y);
+                    /*printf("%f %f\n", current_solid->collision_forces[force_to_apply_nbr].force.x,
+                                      current_solid->collision_forces[force_to_apply_nbr].force.y);*/
                 }
             }
         }
