@@ -11,7 +11,7 @@ void MapData_free(MapData * m) {
     glDeleteTextures(1, &m->terrain.tex_id);
     glDeleteTextures(1, &m->artwork.tex_id);
     for(; m->wall_count; --m->wall_count) {
-        ConvexShape_free_content(&(m->walls[m->wall_count].physic_obstacle.shape));
+        ConvexShape_free_content(&(m->walls[m->wall_count-1].physic_obstacle.shape));
     }
     free(m->walls);
     if(m->music) Mix_FreeMusic(m->music);

@@ -282,6 +282,9 @@ void Compute_force(Solid * solid, Force * force, float duration) {
     if(f < 0)
         f = 0;
         
+    /* Pour compenser les autres dysfonctionnements, ça rend le jeu jouable */
+    f = 0.001;
+        
     force->force = MulVec2(force->force, f);
     
     return;
